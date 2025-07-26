@@ -18,7 +18,7 @@ struct ShopView: View {
         NavigationStack {
             ZStack {
                 // Background
-                backgroundView
+                BackgroundView(playerProgress: playerProgress)
                 
                 VStack(spacing: 0) {
                     // Top Navigation with Coins
@@ -48,7 +48,6 @@ struct ShopView: View {
                             SettingsViewModel.shared.playButtonSound()
                         }
                     }
-                    .padding(.horizontal, 40)
                     
                     Spacer()
                 }
@@ -63,49 +62,24 @@ struct ShopView: View {
         }
     }
     
-    // MARK: - Background View
-    private var backgroundView: some View {
-        LinearGradient(
-            colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.6)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-    }
-    
     // MARK: - Top Navigation Bar
     private var topNavigationBar: some View {
         HStack {
-            // Home Button
-            Button(action: { dismiss() }) {
-                Image(systemName: "house.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.3))
-                    .clipShape(Circle())
-            }
-            
             Spacer()
             
-            // Coins Display
-            HStack(spacing: 8) {
-                Text("\(playerProgress.coins)")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
-                Image(systemName: "dollarsign.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.yellow)
+            // Back/Home Button
+            Button(action: { dismiss() }) {
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.home)
+                            .resizable()
+                            .padding(10)
+                    }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color.black.opacity(0.3))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
+        .padding()
     }
 }
 
@@ -118,26 +92,13 @@ struct CategorySelectionButton: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 15) {
-                Image(systemName: icon)
-                    .font(.system(size: 40))
-                    .foregroundColor(.white)
-                
-                Text(title)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 120)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(color.opacity(0.8))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
-            )
+            Text(title)
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .frame(maxWidth: 200, maxHeight: 80)
+                .background(
+                    Image(.btn2).resizable()
+                )
         }
         .scaleEffect(1.0)
         .animation(.easeInOut(duration: 0.1), value: false)

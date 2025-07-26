@@ -14,7 +14,7 @@ struct BackgroundShopView: View {
     var body: some View {
         ZStack {
             // Background
-            backgroundView
+            BackgroundView(playerProgress: playerProgress)
             
             VStack(spacing: 0) {
                 // Top Navigation Bar
@@ -34,57 +34,34 @@ struct BackgroundShopView: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
+                    .padding()
                 }
             }
         }
         .navigationBarHidden(true)
     }
     
-    // MARK: - Background View
-    private var backgroundView: some View {
-        LinearGradient(
-            colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.6)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-    }
-    
     // MARK: - Top Navigation Bar
     private var topNavigationBar: some View {
         HStack {
-            // Home Button
-            Button(action: { dismiss() }) {
-                Image(systemName: "house.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.3))
-                    .clipShape(Circle())
-            }
+            // Coins Display
+            ScoreboardView(coins: playerProgress.coins)
             
             Spacer()
             
-            // Coins Display
-            HStack(spacing: 8) {
-                Text("\(playerProgress.coins)")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
-                Image(systemName: "dollarsign.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.yellow)
+            // Back/Home Button
+            Button(action: { dismiss() }) {
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.home)
+                            .resizable()
+                            .padding(10)
+                    }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color.black.opacity(0.3))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
+        .padding()
     }
     
     // MARK: - Helper Properties
@@ -136,45 +113,43 @@ struct BackgroundItemCard: View {
     
     var body: some View {
         HStack(spacing: 15) {
-            // Preview Image
-            backgroundPreview
-            
             // Item Info
             VStack(alignment: .leading, spacing: 8) {
                 Text(item.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                 
                 if !item.isDefault && !item.isPurchased {
                     HStack(spacing: 6) {
                         Text("\(item.price)")
-                            .font(.headline)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.green)
                         
-                        Image(systemName: "dollarsign.circle")
-                            .font(.headline)
-                            .foregroundColor(.yellow)
+                        Image(.coin)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 20)
                     }
                 }
                 
                 Spacer()
+                
+                // Action Button
+                actionButton
             }
             
             Spacer()
             
-            // Action Button
-            actionButton
+            // Preview Image
+            backgroundPreview
         }
-        .padding(16)
+        .padding()
         .frame(height: 140)
         .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white.opacity(0.15))
+            Image(.underlay2).resizable()
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 15)
+            RoundedRectangle(cornerRadius: 10)
                 .stroke(isSelected ? Color.green : Color.white.opacity(0.3), lineWidth: isSelected ? 3 : 1)
         )
         .scaleEffect(isSelected ? 1.02 : 1.0)
@@ -183,31 +158,22 @@ struct BackgroundItemCard: View {
     
     // MARK: - Background Preview
     private var backgroundPreview: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(Color.gray.opacity(0.3))
-            .frame(width: 120, height: 80)
-            .overlay(
-                Image(item.imageName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
-            )
+        Image(item.imageName)
+            .resizable()
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .frame(width: 100, height: 100)
     }
     
     // MARK: - Action Button
     private var actionButton: some View {
         Button(action: onAction) {
             Text(buttonText)
-                .font(.subheadline)
-                .fontWeight(.bold)
+                .font(.system(size: 12, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .frame(width: 80, height: 36)
-                .background(buttonBackgroundColor)
-                .clipShape(RoundedRectangle(cornerRadius: 18))
+                .background(
+                    Image(.btn3).resizable()
+                )
         }
         .disabled(!canInteract)
     }
@@ -222,18 +188,6 @@ struct BackgroundItemCard: View {
             return "Buy"
         } else {
             return "Unavailable"
-        }
-    }
-    
-    private var buttonBackgroundColor: Color {
-        if isSelected {
-            return Color.blue.opacity(0.8)
-        } else if item.isPurchased || item.isDefault {
-            return Color.green.opacity(0.8)
-        } else if canAfford {
-            return Color.green.opacity(0.8)
-        } else {
-            return Color.red.opacity(0.8)
         }
     }
     
