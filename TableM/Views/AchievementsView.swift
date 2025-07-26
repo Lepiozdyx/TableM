@@ -15,7 +15,7 @@ struct AchievementsView: View {
         NavigationView {
             ZStack {
                 // Background
-                backgroundView
+                BackgroundView(playerProgress: playerProgress)
                 
                 VStack(spacing: 0) {
                     // Top Navigation
@@ -23,7 +23,7 @@ struct AchievementsView: View {
                     
                     // Achievements List
                     ScrollView {
-                        VStack(spacing: 15) {
+                        VStack(spacing: 20) {
                             ForEach(playerProgress.achievements) { achievement in
                                 AchievementCard(
                                     achievement: achievement,
@@ -33,8 +33,7 @@ struct AchievementsView: View {
                                 )
                             }
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
+                        .padding()
                     }
                 }
             }
@@ -42,57 +41,27 @@ struct AchievementsView: View {
         }
     }
     
-    // MARK: - Background View
-    private var backgroundView: some View {
-        LinearGradient(
-            colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.6)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-    }
-    
     // MARK: - Top Navigation Bar
     private var topNavigationBar: some View {
         HStack {
+            // Coins Display
+            ScoreboardView(coins: playerProgress.coins)
+            
+            Spacer()
+            
             // Back/Home Button
             Button(action: { dismiss() }) {
-                Image(systemName: "house.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.3))
-                    .clipShape(Circle())
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.home)
+                            .resizable()
+                            .padding(10)
+                    }
             }
-            
-            Spacer()
-            
-            // Title
-            Text("Achievements")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-            
-            Spacer()
-            
-            // Coins Display
-            HStack(spacing: 8) {
-                Text("\(playerProgress.coins)")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
-                Image(systemName: "dollarsign.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.yellow)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color.black.opacity(0.3))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
+        .padding()
     }
     
     // MARK: - Helper Methods
@@ -117,28 +86,20 @@ struct AchievementCard: View {
             // Achievement Info
             VStack(alignment: .leading, spacing: 8) {
                 Text(achievement.type.title)
-                    .font(.headline)
-                    .fontWeight(.bold)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                 
                 Text(achievement.type.description)
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.gray)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 
                 // Reward info
                 if achievement.isUnlocked && !achievement.isClaimed {
-                    HStack(spacing: 6) {
-                        Text("+\(achievement.type.reward)")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.green)
-                        
-                        Image(systemName: "dollarsign.circle")
-                            .font(.subheadline)
-                            .foregroundColor(.yellow)
-                    }
+                    Text("+\(achievement.type.reward)")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(.green)
                 }
             }
             
@@ -147,14 +108,11 @@ struct AchievementCard: View {
             // Action Button or Status
             actionSection
         }
-        .padding(16)
+        .padding(.horizontal)
+        .padding(.vertical, 25)
         .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(backgroundColor)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(borderColor, lineWidth: borderWidth)
+            Image(.underlay1)
+                .resizable()
         )
         .opacity(achievement.isUnlocked ? 1.0 : 0.6)
     }
@@ -166,73 +124,37 @@ struct AchievementCard: View {
                 // Already claimed
                 VStack(spacing: 4) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.title2)
+                        .font(.system(size: 20))
                         .foregroundColor(.green)
                     
                     Text("Claimed")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.green)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
                 }
             } else if achievement.isUnlocked {
                 // Ready to claim
                 Button(action: onClaim) {
                     Text("Claim")
-                        .font(.subheadline)
-                        .fontWeight(.bold)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                         .frame(width: 70, height: 36)
-                        .background(Color.green.opacity(0.8))
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        .background(
+                            Image(.btn3)
+                                .resizable()
+                        )
                 }
             } else {
                 // Not unlocked yet
                 VStack(spacing: 4) {
-                    Image(systemName: "lock.fill")
-                        .font(.title2)
-                        .foregroundColor(.gray)
+                    Image(.lock)
+                        .resizable()
+                        .frame(width: 20, height: 25)
                     
                     Text("Locked")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.gray)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
                 }
             }
-        }
-    }
-    
-    // MARK: - Styling Properties
-    private var backgroundColor: Color {
-        if achievement.isClaimed {
-            return Color.green.opacity(0.2)
-        } else if achievement.isUnlocked {
-            return Color.blue.opacity(0.2)
-        } else {
-            return Color.white.opacity(0.1)
-        }
-    }
-    
-    private var borderColor: Color {
-        if achievement.isClaimed {
-            return Color.green.opacity(0.5)
-        } else if achievement.isUnlocked {
-            return Color.blue.opacity(0.5)
-        } else {
-            return Color.white.opacity(0.3)
-        }
-    }
-    
-    private var borderWidth: CGFloat {
-        return achievement.isUnlocked && !achievement.isClaimed ? 2 : 1
-    }
-    
-    private var iconBackgroundColor: Color {
-        if achievement.isClaimed {
-            return Color.green.opacity(0.8)
-        } else if achievement.isUnlocked {
-            return Color.blue.opacity(0.8)
-        } else {
-            return Color.gray.opacity(0.6)
         }
     }
 }
