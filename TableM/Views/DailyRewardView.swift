@@ -88,10 +88,9 @@ struct DailyRewardView: View {
                 )
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 40)
+        .padding()
         .background(
-            Image(.underlay1)
+            Image(.underlay2)
                 .resizable()
         )
     }
@@ -203,10 +202,9 @@ struct DailyLoginCard: View {
             }
             .disabled(!dailyReward.canClaimToday)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 40)
+        .padding()
         .background(
-            Image(.underlay1)
+            Image(.underlay2)
                 .resizable()
         )
     }

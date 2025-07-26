@@ -111,7 +111,7 @@ struct AchievementCard: View {
         .padding(.horizontal)
         .padding(.vertical, 25)
         .background(
-            Image(.underlay1)
+            Image(.underlay2)
                 .resizable()
         )
         .opacity(achievement.isUnlocked ? 1.0 : 0.6)
@@ -122,19 +122,18 @@ struct AchievementCard: View {
         Group {
             if achievement.isClaimed {
                 // Already claimed
-                VStack(spacing: 4) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.green)
-                    
-                    Text("Claimed")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                }
+                Text("Claimed")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(width: 70, height: 36)
+                    .background(
+                        Image(.btn2)
+                            .resizable()
+                    )
             } else if achievement.isUnlocked {
                 // Ready to claim
                 Button(action: onClaim) {
-                    Text("Claim")
+                    Text("Get")
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                         .frame(width: 70, height: 36)
