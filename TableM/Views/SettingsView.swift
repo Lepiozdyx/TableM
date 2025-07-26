@@ -17,34 +17,22 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Background
+                BackgroundView(playerProgress: playerProgress)
                 
-                ScrollView {
-                    VStack(spacing: 25) {
-                        // Audio Settings Section
-                        audioSettingsSection
-                        
-                        // Game Settings Section
-                        gameSettingsSection
-                        
-                        // About Section
-                        aboutSection
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
+                VStack {
+                    topNavigationBar
+                    
+                    Spacer()
+                    
+                    // Audio Settings Section
+                    audioSettingsSection
+                    
+                    Spacer()
+                    Spacer()
                 }
+                .padding()
             }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        saveSettings()
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
-                }
-            }
+            .navigationBarHidden(true)
         }
         .onAppear {
             setupAudioSettings()
@@ -59,30 +47,46 @@ struct SettingsView: View {
         }
     }
     
+    // MARK: - Top Navigation Bar
+    private var topNavigationBar: some View {
+        HStack {
+            Spacer()
+            
+            // Home Button
+            Button(action: { dismiss() }) {
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.home)
+                            .resizable()
+                            .padding(10)
+                    }
+            }
+        }
+        .padding()
+    }
+    
     // MARK: - Audio Settings Section
     private var audioSettingsSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            sectionHeader("Audio")
+        VStack(spacing: 20) {
+            sectionHeader("Settings")
+                .padding(.top, 20)
+                .padding(.bottom, 30)
             
             VStack(spacing: 25) {
                 // Music Settings
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Image(systemName: "music.note")
-                            .font(.title2)
-                            .foregroundColor(.blue)
-                            .frame(width: 30)
-                        
                         Text("Music")
-                            .font(.headline)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
                         
                         Spacer()
                         
                         Text("\(Int(playerProgress.musicVolume * 100))%")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .frame(minWidth: 40)
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
                     }
                     
                     Slider(
@@ -104,26 +108,18 @@ struct SettingsView: View {
                     }
                 }
                 
-                Divider()
-                
                 // Sound Effects Settings
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Image(systemName: "speaker.wave.2")
-                            .font(.title2)
-                            .foregroundColor(.orange)
-                            .frame(width: 30)
-                        
-                        Text("Sounds")
-                            .font(.headline)
-                            .fontWeight(.semibold)
+                        Text("Sound")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
                         
                         Spacer()
                         
                         Text("\(Int(playerProgress.soundVolume * 100))%")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .frame(minWidth: 40)
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
                     }
                     
                     Slider(
@@ -146,87 +142,19 @@ struct SettingsView: View {
                 }
             }
         }
-        .padding(20)
-        .background(Color.white.opacity(0.95))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
-    }
-    
-    // MARK: - Game Settings Section
-    private var gameSettingsSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            sectionHeader("Game")
-            
-            VStack(spacing: 15) {
-                // Reset Progress Button
-                SettingsRowView(
-                    icon: "arrow.counterclockwise",
-                    iconColor: .red,
-                    title: "Reset Progress",
-                    subtitle: "Clear all game data",
-                    showChevron: false
-                ) {
-                    showingResetAlert = true
-                }
-            }
-        }
-        .padding(20)
-        .background(Color.white.opacity(0.95))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
-    }
-    
-    // MARK: - About Section
-    private var aboutSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            sectionHeader("About")
-            
-            VStack(spacing: 15) {
-                // App Version
-                SettingsRowView(
-                    icon: "info.circle",
-                    iconColor: .blue,
-                    title: "Version",
-                    subtitle: "1.0.0",
-                    showChevron: false
-                )
-                
-                Divider()
-                
-                // Developer
-                SettingsRowView(
-                    icon: "person.circle",
-                    iconColor: .purple,
-                    title: "Developer",
-                    subtitle: "Table M Games",
-                    showChevron: false
-                )
-                
-                Divider()
-                
-                // Game Description
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("About Table M")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
-                    Text("A logic puzzle game where you crack secret color codes using deduction and systematic thinking. Travel the world and unlock the mysteries of each location!")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(nil)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-        .padding(20)
-        .background(Color.white.opacity(0.95))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .padding(.horizontal, 30)
+        .padding(.bottom, 100)
+        .background(
+            Image(.underlay1)
+                .resizable()
+        )
     }
     
     // MARK: - Section Header
     private func sectionHeader(_ title: String) -> some View {
         Text(title)
-            .font(.title2)
-            .fontWeight(.bold)
-            .foregroundColor(.white)
+            .font(.system(size: 20, weight: .bold, design: .rounded))
+            .foregroundStyle(.gray)
     }
     
     // MARK: - Helper Methods
@@ -288,67 +216,6 @@ struct SettingsView: View {
         
         // Restart audio with fresh settings
         setupAudioSettings()
-    }
-}
-
-// MARK: - Settings Row Component
-struct SettingsRowView: View {
-    let icon: String
-    let iconColor: Color
-    let title: String
-    let subtitle: String?
-    let showChevron: Bool
-    let action: (() -> Void)?
-    
-    init(
-        icon: String,
-        iconColor: Color,
-        title: String,
-        subtitle: String? = nil,
-        showChevron: Bool = true,
-        action: (() -> Void)? = nil
-    ) {
-        self.icon = icon
-        self.iconColor = iconColor
-        self.title = title
-        self.subtitle = subtitle
-        self.showChevron = showChevron
-        self.action = action
-    }
-    
-    var body: some View {
-        Button(action: {
-            action?()
-        }) {
-            HStack(spacing: 15) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundColor(iconColor)
-                    .frame(width: 30)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    if let subtitle = subtitle {
-                        Text(subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Spacer()
-                
-                if showChevron {
-                    Image(systemName: "chevron.right")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .disabled(action == nil)
     }
 }
 

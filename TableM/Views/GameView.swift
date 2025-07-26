@@ -72,8 +72,8 @@ struct GameView: View {
                 hasNextLevel: gameViewModel.shouldShowNextLevelButton,
                 hasSecretStory: gameViewModel.shouldShowSecretStoryButton,
                 onNextLevel: {
-                    if let nextLevel = gameViewModel.nextLevel() {
-                        // Navigate to next level
+                    if let _ = gameViewModel.nextLevel() {
+                        // Navigate to next level ?
                         showingVictory = false
                     }
                 },

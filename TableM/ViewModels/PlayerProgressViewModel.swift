@@ -1,5 +1,5 @@
 //
-//  GameViewModel.swift
+//  PlayerProgressViewModel.swift
 //  TableM
 //
 //  Created by Alex on 23.07.2025.
@@ -37,8 +37,8 @@ class PlayerProgressViewModel: ObservableObject, Codable {
         self.coins = 0
         self.currentLocation = .france
         self.unlockedLocations = [.france]
-        self.selectedBackground = "default"
-        self.selectedSkin = "default"
+        self.selectedBackground = "bg_default"
+        self.selectedSkin = "skin_default"
         
         // Audio settings
         self.isMusicEnabled = true
@@ -272,15 +272,15 @@ class PlayerProgressViewModel: ObservableObject, Codable {
         
         // Backgrounds
         items.append(ShopItem(id: "default", type: .background, name: "Classic", price: 0, imageName: "bg_default", isPurchased: true, isDefault: true))
-        items.append(ShopItem(id: "luxury", type: .background, name: "Luxury", price: 200, imageName: "bg_luxury"))
-        items.append(ShopItem(id: "nature", type: .background, name: "Nature", price: 200, imageName: "bg_nature"))
-        items.append(ShopItem(id: "space", type: .background, name: "Space", price: 300, imageName: "bg_space"))
+        items.append(ShopItem(id: "lab", type: .background, name: "Lab", price: 200, imageName: "bg_lab"))
+        items.append(ShopItem(id: "garden", type: .background, name: "Garden", price: 200, imageName: "bg_garden"))
+        items.append(ShopItem(id: "neon", type: .background, name: "Neon", price: 300, imageName: "bg_neon"))
         
         // Skins
         items.append(ShopItem(id: "default", type: .skin, name: "Classic", price: 0, imageName: "skin_default", isPurchased: true, isDefault: true))
-        items.append(ShopItem(id: "neon", type: .skin, name: "Neon", price: 150, imageName: "skin_neon"))
-        items.append(ShopItem(id: "gold", type: .skin, name: "Gold", price: 250, imageName: "skin_gold"))
-        items.append(ShopItem(id: "diamond", type: .skin, name: "Diamond", price: 400, imageName: "skin_diamond"))
+        items.append(ShopItem(id: "arctic", type: .skin, name: "Arctic", price: 150, imageName: "skin_arctic"))
+        items.append(ShopItem(id: "zen", type: .skin, name: "Zen", price: 250, imageName: "skin_zen"))
+        items.append(ShopItem(id: "cyber", type: .skin, name: "Cyber", price: 400, imageName: "skin_cyber"))
         
         return items
     }

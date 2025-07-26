@@ -17,7 +17,7 @@ struct DailyRewardView: View {
         NavigationView {
             ZStack {
                 // Background
-                backgroundView
+                BackgroundView(playerProgress: playerProgress)
                 
                 VStack(spacing: 0) {
                     // Top Navigation
@@ -27,13 +27,17 @@ struct DailyRewardView: View {
                     ScrollView {
                         VStack(spacing: 30) {
                             // Daily Login Reward
-                            dailyLoginSection
+                            DailyLoginCard(
+                                dailyReward: playerProgress.dailyReward,
+                                onClaim: {
+                                    claimDailyLogin()
+                                }
+                            )
                             
                             // Daily Tasks
                             dailyTasksSection
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
+                        .padding()
                     }
                 }
                 
@@ -46,121 +50,91 @@ struct DailyRewardView: View {
         }
     }
     
-    // MARK: - Background View
-    private var backgroundView: some View {
-        LinearGradient(
-            colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.6)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-    }
-    
     // MARK: - Top Navigation Bar
     private var topNavigationBar: some View {
         HStack {
+            // Coins Display
+            ScoreboardView(coins: playerProgress.coins)
+            
+            Spacer()
+            
             // Back/Home Button
             Button(action: { dismiss() }) {
-                Image(systemName: "house.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.3))
-                    .clipShape(Circle())
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.home)
+                            .resizable()
+                            .padding(10)
+                    }
             }
-            
-            Spacer()
-            
-            // Title
-            Text("Daily Rewards")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-            
-            Spacer()
-            
-            // Coins Display
-            HStack(spacing: 8) {
-                Text("\(playerProgress.coins)")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
-                Image(systemName: "dollarsign.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.yellow)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color.black.opacity(0.3))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-    }
-    
-    // MARK: - Daily Login Section
-    private var dailyLoginSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            sectionHeader("Daily Login Bonus")
-            
-            DailyLoginCard(
-                dailyReward: playerProgress.dailyReward,
-                onClaim: {
-                    claimDailyLogin()
-                }
-            )
-        }
+        .padding()
     }
     
     // MARK: - Daily Tasks Section
     private var dailyTasksSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 15) {
             sectionHeader("Daily Tasks")
             
-            VStack(spacing: 15) {
-                ForEach(playerProgress.dailyTasks) { task in
-                    DailyTaskCard(
-                        task: task,
-                        playerProgress: playerProgress,
-                        onClaim: {
-                            claimDailyTask(task.type)
-                        }
-                    )
-                }
+            ForEach(playerProgress.dailyTasks) { task in
+                DailyTaskCard(
+                    task: task,
+                    playerProgress: playerProgress,
+                    onClaim: {
+                        claimDailyTask(task.type)
+                    }
+                )
             }
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 40)
+        .background(
+            Image(.underlay1)
+                .resizable()
+        )
     }
     
     // MARK: - Section Header
     private func sectionHeader(_ title: String) -> some View {
         Text(title)
-            .font(.title2)
-            .fontWeight(.bold)
-            .foregroundColor(.white)
+            .font(.system(size: 20, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
     }
     
     // MARK: - Claim Animation Overlay
     private var claimAnimationOverlay: some View {
         ZStack {
-            Color.black.opacity(0.3)
+            Color.black.opacity(0.5)
                 .ignoresSafeArea()
             
-            VStack(spacing: 20) {
-                Image(systemName: "dollarsign.circle.fill")
+            VStack(spacing: 10) {
+                Image(systemName: "gift.fill")
                     .font(.system(size: 80))
-                    .foregroundColor(.yellow)
+                    .foregroundColor(.white)
                     .scaleEffect(showingClaimAnimation ? 1.2 : 0.8)
                     .animation(.easeInOut(duration: 0.5).repeatCount(3), value: showingClaimAnimation)
                 
+                Text("Congratulations!")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                
                 Text("Reward Claimed!")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.gray)
+                
+                ScoreboardView(coins: 10)
             }
+            .padding(.horizontal, 60)
+            .padding(.vertical, 80)
+            .background(
+                Image(.underlay1)
+                    .resizable()
+            )
         }
         .opacity(showingClaimAnimation ? 1 : 0)
-        .animation(.easeInOut(duration: 0.3), value: showingClaimAnimation)
+        .animation(.easeInOut(duration: 0.5), value: showingClaimAnimation)
     }
     
     // MARK: - Helper Methods
@@ -199,39 +173,17 @@ struct DailyLoginCard: View {
     
     var body: some View {
         HStack(spacing: 20) {
-            // Calendar Icon
-            VStack(spacing: 8) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 40))
-                    .foregroundColor(.yellow)
-                
-                Text("Day \(dailyReward.consecutiveDays + 1)")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-            }
-            
             // Reward Info
             VStack(alignment: .leading, spacing: 8) {
                 Text("Daily Login Bonus")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
                 
                 Text("Come back daily to build your streak!")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.gray)
                 
-                HStack(spacing: 6) {
-                    Text("+\(dailyReward.todayReward)")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.green)
-                    
-                    Image(systemName: "dollarsign.circle")
-                        .font(.subheadline)
-                        .foregroundColor(.yellow)
-                }
+                ScoreboardView(coins: dailyReward.todayReward)
             }
             
             Spacer()
@@ -243,19 +195,19 @@ struct DailyLoginCard: View {
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                     .frame(width: 80, height: 40)
-                    .background(dailyReward.canClaimToday ? Color.green.opacity(0.8) : Color.gray.opacity(0.6))
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .background(
+                        dailyReward.canClaimToday
+                        ? Image(.btn3).resizable()
+                        : Image(.btn2).resizable()
+                    )
             }
             .disabled(!dailyReward.canClaimToday)
         }
-        .padding(20)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 40)
         .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white.opacity(0.15))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(dailyReward.canClaimToday ? Color.yellow.opacity(0.5) : Color.white.opacity(0.3), lineWidth: dailyReward.canClaimToday ? 2 : 1)
+            Image(.underlay1)
+                .resizable()
         )
     }
 }
@@ -268,31 +220,20 @@ struct DailyTaskCard: View {
     
     var body: some View {
         HStack(spacing: 15) {
-            // Task Icon
-            taskIcon
-            
             // Task Info
             VStack(alignment: .leading, spacing: 8) {
                 Text(task.type.description)
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
                 
                 Text(progressText)
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.gray)
                 
                 if task.isCompleted && !task.isClaimed {
-                    HStack(spacing: 6) {
-                        Text("+\(task.type.reward)")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.green)
-                        
-                        Image(systemName: "dollarsign.circle")
-                            .font(.subheadline)
-                            .foregroundColor(.yellow)
-                    }
+                    Text("+\(task.type.reward)")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
                 }
             }
             
@@ -301,28 +242,15 @@ struct DailyTaskCard: View {
             // Status/Claim Button
             taskActionView
         }
-        .padding(16)
+        .padding()
         .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(backgroundColor)
+            RoundedRectangle(cornerRadius: 5)
+                .fill(.clear)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(borderColor, lineWidth: borderWidth)
+            RoundedRectangle(cornerRadius: 5)
+                .stroke(.white.opacity(0.3), lineWidth: 1)
         )
-    }
-    
-    // MARK: - Task Icon
-    private var taskIcon: some View {
-        ZStack {
-            Circle()
-                .fill(iconBackgroundColor)
-                .frame(width: 50, height: 50)
-            
-            Image(systemName: iconName)
-                .font(.title2)
-                .foregroundColor(.white)
-        }
     }
     
     // MARK: - Task Action View
@@ -331,34 +259,33 @@ struct DailyTaskCard: View {
             if task.isClaimed {
                 VStack(spacing: 4) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.title2)
+                        .font(.system(size: 20))
                         .foregroundColor(.green)
                     
                     Text("Claimed")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.green)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
                 }
             } else if task.isCompleted {
                 Button(action: onClaim) {
                     Text("Claim")
-                        .font(.subheadline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
                         .frame(width: 70, height: 36)
-                        .background(Color.green.opacity(0.8))
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        .background(
+                            Image(.btn3)
+                                .resizable()
+                        )
                 }
             } else {
                 VStack(spacing: 4) {
                     Image(systemName: "clock")
-                        .font(.title2)
-                        .foregroundColor(.orange)
+                        .font(.system(size: 20))
+                        .foregroundColor(.indigo)
                     
                     Text("Pending")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.orange)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(.indigo)
                 }
             }
         }
@@ -371,49 +298,6 @@ struct DailyTaskCard: View {
             return playerProgress.totalGamesPlayed > 0 ? "Completed!" : "Start any level"
         case .completeLevel:
             return playerProgress.totalLevelsCompleted > 0 ? "Completed!" : "Win any level"
-        }
-    }
-    
-    private var iconName: String {
-        switch task.type {
-        case .playGame:
-            return "play.circle"
-        case .completeLevel:
-            return "star.circle"
-        }
-    }
-    
-    private var backgroundColor: Color {
-        if task.isClaimed {
-            return Color.green.opacity(0.2)
-        } else if task.isCompleted {
-            return Color.blue.opacity(0.2)
-        } else {
-            return Color.white.opacity(0.1)
-        }
-    }
-    
-    private var borderColor: Color {
-        if task.isClaimed {
-            return Color.green.opacity(0.5)
-        } else if task.isCompleted {
-            return Color.blue.opacity(0.5)
-        } else {
-            return Color.white.opacity(0.3)
-        }
-    }
-    
-    private var borderWidth: CGFloat {
-        return task.isCompleted && !task.isClaimed ? 2 : 1
-    }
-    
-    private var iconBackgroundColor: Color {
-        if task.isClaimed {
-            return Color.green.opacity(0.8)
-        } else if task.isCompleted {
-            return Color.blue.opacity(0.8)
-        } else {
-            return Color.orange.opacity(0.8)
         }
     }
 }

@@ -188,17 +188,7 @@ enum AchievementType: String, CaseIterable, Codable {
     }
     
     var reward: Int {
-        return 10 // All achievements give 10 coins
-    }
-    
-    var iconName: String {
-        switch self {
-        case .firstGuess: return "hand.point.up.left"
-        case .codeBreaker: return "lock.open"
-        case .persistence: return "repeat"
-        case .worldTraveler: return "globe"
-        case .perfection: return "star"
-        }
+        return 10
     }
 }
 

@@ -114,9 +114,6 @@ struct AchievementCard: View {
     
     var body: some View {
         HStack(spacing: 15) {
-            // Achievement Icon
-            achievementIcon
-            
             // Achievement Info
             VStack(alignment: .leading, spacing: 8) {
                 Text(achievement.type.title)
@@ -160,19 +157,6 @@ struct AchievementCard: View {
                 .stroke(borderColor, lineWidth: borderWidth)
         )
         .opacity(achievement.isUnlocked ? 1.0 : 0.6)
-    }
-    
-    // MARK: - Achievement Icon
-    private var achievementIcon: some View {
-        ZStack {
-            Circle()
-                .fill(iconBackgroundColor)
-                .frame(width: 50, height: 50)
-            
-            Image(systemName: achievement.type.iconName)
-                .font(.title2)
-                .foregroundColor(.white)
-        }
     }
     
     // MARK: - Action Section
