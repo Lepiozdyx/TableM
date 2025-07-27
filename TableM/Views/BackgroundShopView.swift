@@ -75,12 +75,15 @@ struct BackgroundShopView: View {
             // Select the item
             selectItem(item)
             SettingsViewModel.shared.playButtonSound()
-            saveChanges()
         } else if playerProgress.coins >= item.price {
             // Purchase the item
-            purchaseItem(item)
-            SettingsViewModel.shared.playVictorySound()
-            saveChanges()
+            if purchaseItem(item) {
+                // Automatically select the purchased item
+                selectItem(item)
+                SettingsViewModel.shared.playVictorySound()
+            } else {
+                SettingsViewModel.shared.playDefeatSound()
+            }
         } else {
             // Cannot afford - play sound to indicate error
             SettingsViewModel.shared.playDefeatSound()
@@ -88,15 +91,16 @@ struct BackgroundShopView: View {
     }
     
     private func selectItem(_ item: ShopItem) {
-        playerProgress.selectedBackground = item.id
+        playerProgress.selectBackground(item.id)
+        saveChanges()
     }
     
-    private func purchaseItem(_ item: ShopItem) {
+    private func purchaseItem(_ item: ShopItem) -> Bool {
         let success = playerProgress.purchaseItem(item)
         if success {
-            // Automatically select the purchased item
-            selectItem(item)
+            saveChanges()
         }
+        return success
     }
     
     private func saveChanges() {
@@ -150,7 +154,7 @@ struct BackgroundItemCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(isSelected ? Color.green : Color.white.opacity(0.3), lineWidth: isSelected ? 3 : 1)
+                .stroke(isSelected ? Color.white : Color.white.opacity(0.3), lineWidth: isSelected ? 2 : 1)
         )
         .scaleEffect(isSelected ? 1.02 : 1.0)
         .animation(.easeInOut(duration: 0.2), value: isSelected)
@@ -172,7 +176,7 @@ struct BackgroundItemCard: View {
                 .foregroundColor(.white)
                 .frame(width: 80, height: 36)
                 .background(
-                    Image(.btn3).resizable()
+                    Image(buttonImageName).resizable()
                 )
         }
         .disabled(!canInteract)
@@ -188,6 +192,16 @@ struct BackgroundItemCard: View {
             return "Buy"
         } else {
             return "Unavailable"
+        }
+    }
+    
+    private var buttonImageName: ImageResource {
+        if !canInteract {
+            return .btn2
+        } else if isSelected {
+            return .btn2
+        } else {
+            return .btn3
         }
     }
     

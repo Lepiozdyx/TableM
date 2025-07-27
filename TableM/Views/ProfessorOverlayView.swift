@@ -48,7 +48,7 @@ struct ProfessorOverlayView: View {
     
     // MARK: - Professor Image
     private var professorImageView: some View {
-        Image(playerProgress.selectedSkin)
+        Image(playerProgress.getSelectedSkinImageName())
             .resizable()
             .scaledToFit()
             .frame(height: 450)

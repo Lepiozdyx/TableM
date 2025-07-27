@@ -37,8 +37,8 @@ class PlayerProgressViewModel: ObservableObject, Codable {
         self.coins = 0
         self.currentLocation = .france
         self.unlockedLocations = [.france]
-        self.selectedBackground = "bg_default"
-        self.selectedSkin = "skin_default"
+        self.selectedBackground = "default"
+        self.selectedSkin = "default"
         
         // Audio settings
         self.isMusicEnabled = true
@@ -224,15 +224,24 @@ class PlayerProgressViewModel: ObservableObject, Codable {
     }
     
     func selectBackground(_ backgroundId: String) {
-        if shopItems.first(where: { $0.id == backgroundId && $0.isPurchased }) != nil {
+        if let _ = shopItems.first(where: { $0.id == backgroundId && $0.type == .background && ($0.isPurchased || $0.isDefault) }) {
             selectedBackground = backgroundId
         }
     }
     
     func selectSkin(_ skinId: String) {
-        if shopItems.first(where: { $0.id == skinId && $0.isPurchased }) != nil {
+        if let _ = shopItems.first(where: { $0.id == skinId && $0.type == .skin && ($0.isPurchased || $0.isDefault) }) {
             selectedSkin = skinId
         }
+    }
+    
+    // MARK: - Helper Methods for UI
+    func getSelectedBackgroundImageName() -> String {
+        return shopItems.first(where: { $0.id == selectedBackground && $0.type == .background })?.imageName ?? "bg_default"
+    }
+    
+    func getSelectedSkinImageName() -> String {
+        return shopItems.first(where: { $0.id == selectedSkin && $0.type == .skin })?.imageName ?? "skin_default"
     }
     
     // MARK: - Daily Rewards

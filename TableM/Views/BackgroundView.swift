@@ -11,7 +11,7 @@ struct BackgroundView: View {
     @ObservedObject var playerProgress: PlayerProgressViewModel
     
     var body: some View {
-        Image(playerProgress.selectedBackground)
+        Image(playerProgress.getSelectedBackgroundImageName())
             .resizable()
             .ignoresSafeArea()
     }

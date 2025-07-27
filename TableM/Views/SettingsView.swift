@@ -27,6 +27,10 @@ struct SettingsView: View {
                     audioSettingsSection
                     
                     Spacer()
+                    
+                    // Reset Progress Button
+                    resetProgressButton
+                    
                     Spacer()
                 }
                 .padding()
@@ -125,11 +129,27 @@ struct SettingsView: View {
             }
         }
         .padding(.horizontal, 30)
-        .padding(.bottom, 100)
+        .padding(.vertical, 40)
         .background(
             Image(.underlay1)
                 .resizable()
         )
+    }
+    
+    // MARK: - Reset Progress Button
+    private var resetProgressButton: some View {
+        Button(action: {
+            showingResetAlert = true
+        }) {
+            Text("Reset Progress")
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundColor(.yellow)
+                .frame(width: 150, height: 50)
+                .background(
+                    Image(.btn2)
+                        .resizable()
+                )
+        }
     }
     
     // MARK: - Section Header
@@ -155,6 +175,9 @@ struct SettingsView: View {
         
         // Re-setup SettingsViewModel with fresh progress
         SettingsViewModel.shared.setPlayerProgress(playerProgress)
+        
+        // Play confirmation sound
+        SettingsViewModel.shared.playButtonSound()
     }
     
     private func updatePlayerProgress(with freshProgress: PlayerProgressViewModel) {
