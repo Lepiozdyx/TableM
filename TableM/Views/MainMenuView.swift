@@ -64,14 +64,18 @@ struct MainMenuView: View {
             .onChange(of: scenePhase) { newPhase in
                 handleScenePhaseChange(newPhase)
             }
+            .onAppear {
+                // FIXED: Force refresh data when view appears
+                refreshDataIfNeeded()
+            }
         }
     }
     
     // MARK: - Top Section
     private var topSection: some View {
         HStack {
-            // Coins display
             ScoreboardView(coins: appState.playerProgress.coins)
+                .id("scoreboard-\(appState.playerProgress.coins)")
             
             Spacer()
             
@@ -162,11 +166,21 @@ struct MainMenuView: View {
         .padding()
     }
     
+    // MARK: - Data Refresh Helper
+    private func refreshDataIfNeeded() {
+        // FIXED: Force reload data when returning to main menu
+        if appState.isDataLoaded {
+            appState.forceReload()
+        }
+    }
+    
     // MARK: - App Lifecycle Management
     private func handleScenePhaseChange(_ newPhase: ScenePhase) {
         switch newPhase {
         case .active:
             appState.handleAppDidBecomeActive()
+            // FIXED: Also refresh data when app becomes active
+            refreshDataIfNeeded()
         case .background, .inactive:
             appState.handleAppWillResignActive()
         @unknown default:
