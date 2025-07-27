@@ -40,6 +40,7 @@ struct LevelSelectionView: View {
             // Professor Comment Overlay
             if showingProfessorComment {
                 ProfessorOverlayView(
+                    playerProgress: playerProgress,
                     message: professorMessage,
                     isOnboarding: false,
                     onNext: { },

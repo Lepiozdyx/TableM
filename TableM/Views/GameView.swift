@@ -44,6 +44,7 @@ struct GameView: View {
             // Professor Overlay
             if case .speaking(let message, let isOnboarding) = gameViewModel.professorState {
                 ProfessorOverlayView(
+                    playerProgress: playerProgress,
                     message: message,
                     isOnboarding: isOnboarding,
                     onNext: gameViewModel.nextOnboardingMessage,

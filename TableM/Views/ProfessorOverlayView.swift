@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ProfessorOverlayView: View {
+    @ObservedObject var playerProgress: PlayerProgressViewModel
+    
     let message: String
     let isOnboarding: Bool
     let onNext: () -> Void
@@ -24,18 +26,17 @@ struct ProfessorOverlayView: View {
                 Spacer()
                 
                 // Professor and speech bubble
-                HStack(alignment: .bottom, spacing: 20) {
-                    // Professor image
+                VStack {
+                    HStack {
+                        Spacer()
+                        speechBubbleView
+                    }
+                    
                     professorImageView
-                    
-                    Spacer()
-                    
-                    // Speech bubble
-                    speechBubbleView
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 100)
+                .offset(x: -100, y: 100)
             }
+            .ignoresSafeArea()
         }
         .opacity(isVisible ? 1 : 0)
         .onAppear {
@@ -47,19 +48,19 @@ struct ProfessorOverlayView: View {
     
     // MARK: - Professor Image
     private var professorImageView: some View {
-        Image("professor_logicus")
+        Image(playerProgress.selectedSkin)
             .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 140, height: 180)
+            .scaledToFit()
+            .frame(height: 450)
     }
     
     // MARK: - Speech Bubble
     private var speechBubbleView: some View {
-        VStack(alignment: .leading, spacing: 15) {
+        VStack(alignment: .leading, spacing: 10) {
             // Message text
             Text(message)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.white)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(.black)
                 .multilineTextAlignment(.leading)
                 .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
@@ -69,11 +70,10 @@ struct ProfessorOverlayView: View {
                 onboardingButtons
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding()
         .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.blue.opacity(0.9))
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Color.indigo.opacity(0.8))
         )
         .overlay(
             // Speech bubble tail
@@ -92,13 +92,14 @@ struct ProfessorOverlayView: View {
                 onSkip()
             }) {
                 Text("Skip")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(.white.opacity(0.8))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
                     .background(
                         RoundedRectangle(cornerRadius: 15)
                             .fill(Color.white.opacity(0.2))
+                            .shadow(color: .black, radius: 1, x: 0.5, y: 0.5)
                     )
             }
             
@@ -110,16 +111,17 @@ struct ProfessorOverlayView: View {
             }) {
                 HStack(spacing: 6) {
                     Text("Next")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                     Image(systemName: "arrow.right")
                         .font(.system(size: 12, weight: .bold))
                 }
-                .foregroundColor(.blue)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .foregroundColor(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .background(
                     RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.white)
+                        .fill(Color.indigo)
+                        .shadow(color: .black, radius: 1, x: 0.5, y: 0.5)
                 )
             }
         }
@@ -128,14 +130,14 @@ struct ProfessorOverlayView: View {
     // MARK: - Speech Bubble Tail
     private var speechBubbleTail: some View {
         Path { path in
-            path.move(to: CGPoint(x: 25, y: 0))
-            path.addLine(to: CGPoint(x: 15, y: 15))
-            path.addLine(to: CGPoint(x: 40, y: 10))
+            path.move(to: CGPoint(x: 20, y: 0))
+            path.addLine(to: CGPoint(x: 20, y: 15))
+            path.addLine(to: CGPoint(x: 40, y: 0))
             path.closeSubpath()
         }
-        .fill(Color.blue.opacity(0.9))
+        .fill(Color.indigo.opacity(0.8))
         .frame(width: 50, height: 20)
-        .offset(x: 10, y: 10)
+        .offset(x: 20, y: 20)
     }
     
     // MARK: - Animation Helper
@@ -156,25 +158,11 @@ struct ProfessorOverlayView: View {
         Color.gray.ignoresSafeArea()
         
         ProfessorOverlayView(
-            message: "Welcome to Table M! I'm Professor Logicus, your guide through this logical adventure.",
+            playerProgress: PlayerProgressViewModel(),
+            message: "Welcome! I'm Professor Logicus, your guide through this logical adventure.",
             isOnboarding: true,
             onNext: { print("Next pressed") },
             onSkip: { print("Skip pressed") },
-            onDismiss: { print("Dismissed") }
-        )
-    }
-}
-
-// MARK: - Regular Message Preview
-#Preview("Regular Message") {
-    ZStack {
-        Color.gray.ignoresSafeArea()
-        
-        ProfessorOverlayView(
-            message: "Excellent deduction! Your logical thinking is impressive.",
-            isOnboarding: false,
-            onNext: { },
-            onSkip: { },
             onDismiss: { print("Dismissed") }
         )
     }
