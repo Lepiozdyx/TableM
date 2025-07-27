@@ -83,11 +83,11 @@ enum GameLocation: String, CaseIterable, Codable {
     
     var secretStory: String {
         switch self {
-        case .france: return "The prestigious École Normale Supérieure in Paris has been training brilliant minds since 1794. Its alumni include mathematicians, philosophers, and Nobel Prize winners who shaped modern thought."
-        case .japan: return "Kyoto University, founded in 1897, stands as Japan's second-oldest university. Known for producing Nobel laureates and fostering innovative research in science and technology."
-        case .brazil: return "The University of São Paulo, Brazil's largest and most prestigious institution, leads Latin American research and has contributed groundbreaking discoveries to global science."
-        case .egypt: return "Al-Azhar University in Cairo, founded in 970 AD, is one of the world's oldest continuously operating universities, bridging ancient wisdom with modern knowledge."
-        case .usa: return "Stanford University, located in the heart of Silicon Valley, has been the birthplace of countless technological innovations that transformed our digital world."
+        case .france: return "One of France’s most prestigious institutions, located in central Paris and founded in 1794. Originally created to train teachers, it has become a hub of academic excellence. Among its alumni are Nobel laureates, philosophers like Jean-Paul Sartre, and mathematicians like Laurent Schwartz. ENS offers elite education in mathematics, natural sciences, and the humanities, known for its academic freedom and interdisciplinary research."
+        case .japan: return "Japan’s leading academic institution, founded in 1877. Ranked among the world’s top universities, it excels in engineering, mathematics, economics, and political science. More than a dozen Nobel laureates have studied or taught here. The university blends traditional Japanese aesthetics with state-of-the-art scientific facilities and maintains strong global partnerships."
+        case .brazil: return "The largest and most influential university in Latin America, established in 1934. With over 40 schools and research centers, USP leads in biology, engineering, agriculture, and social sciences. It is deeply involved in Amazonian biodiversity conservation and has campuses throughout Brazil, with its main one in São Paulo."
+        case .egypt: return "One of the oldest and largest universities in North Africa, established in 1908. A public institution central to science and education in the Arab world. Its strengths include engineering, medicine, mathematics, and law. Cairo University has produced prominent leaders, writers, and scholars. Its campus architecture blends Islamic and European styles."
+        case .usa: return "One of the world’s most influential institutions, founded in 1885 in California’s Silicon Valley. Stanford is the birthplace of numerous tech giants including Google, HP, and Instagram. It’s renowned for computer science, engineering, economics, and biotechnology. Its vast campus looks like a city of the future and is a model for innovation hubs globally."
         }
     }
 }

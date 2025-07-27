@@ -72,7 +72,8 @@ class GameViewModel: ObservableObject {
     
     private func setupOnboarding() {
         onboardingMessages = [
-            "Welcome to Table M! I'm Professor Logicus, your guide through this logical adventure.",
+            "Ah, the code... Is hidden, but not forever! Time to turn on the deduction.",
+            "Each colour is like a variable, and you are an equation looking for the truth.",
             "Your goal is to crack the secret code - a combination of 4 colors from the palette below.",
             "Select colors by tapping them. Each color will fill the highlighted position in your guess.",
             "After completing your row, press 'Check' to see the hints:",
