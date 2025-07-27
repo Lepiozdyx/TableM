@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var playerProgress: PlayerProgressViewModel
-    @StateObject private var settingsViewModel = SettingsViewModel()
     @Environment(\.dismiss) private var dismiss
     
     @State private var showingResetAlert = false
@@ -35,7 +34,8 @@ struct SettingsView: View {
             .navigationBarHidden(true)
         }
         .onAppear {
-            setupAudioSettings()
+            // Just sync the reference, don't reinitialize
+            SettingsViewModel.shared.playerProgress = playerProgress
         }
         .alert("Reset Progress", isPresented: $showingResetAlert) {
             Button("Cancel", role: .cancel) { }
@@ -95,8 +95,7 @@ struct SettingsView: View {
                             .foregroundColor(.gray)
                     }
                     .onChange(of: playerProgress.musicVolume) { newValue in
-                        settingsViewModel.updateMusicVolume(newValue)
-                        playerProgress.isMusicEnabled = newValue > 0
+                        SettingsViewModel.shared.updateMusicVolume(newValue)
                     }
                 }
                 
@@ -120,8 +119,7 @@ struct SettingsView: View {
                             .foregroundColor(.gray)
                     }
                     .onChange(of: playerProgress.soundVolume) { newValue in
-                        settingsViewModel.updateSoundVolume(newValue)
-                        playerProgress.isSoundEnabled = newValue > 0
+                        SettingsViewModel.shared.updateSoundVolume(newValue)
                     }
                 }
             }
@@ -142,44 +140,24 @@ struct SettingsView: View {
     }
     
     // MARK: - Helper Methods
-    private func setupAudioSettings() {
-        settingsViewModel.setupAudio()
-        settingsViewModel.updateMusicVolume(playerProgress.musicVolume)
-        settingsViewModel.updateSoundVolume(playerProgress.soundVolume)
-        
-        if playerProgress.isMusicEnabled && playerProgress.musicVolume > 0 {
-            settingsViewModel.startBackgroundMusic()
-        }
-    }
-    
-    private func saveSettings() {
-        // Update enabled states based on volume
-        playerProgress.isMusicEnabled = playerProgress.musicVolume > 0
-        playerProgress.isSoundEnabled = playerProgress.soundVolume > 0
-        
-        // Save to persistent storage
-        DataManager.shared.savePlayerProgress(playerProgress)
-        
-        // Apply audio settings
-        settingsViewModel.applyAudioSettings(
-            musicVolume: playerProgress.musicVolume,
-            soundVolume: playerProgress.soundVolume,
-            musicEnabled: playerProgress.isMusicEnabled,
-            soundEnabled: playerProgress.isSoundEnabled
-        )
-    }
-    
     private func resetGameProgress() {
         // Stop all audio
-        settingsViewModel.stopAllAudio()
+        SettingsViewModel.shared.stopAllAudio()
         
-        // Reset progress
+        // Reset progress in DataManager
         DataManager.shared.resetPlayerProgress()
         
-        // Load fresh progress
+        // Reload fresh progress
         let freshProgress = DataManager.shared.loadPlayerProgress()
         
-        // Update current progress with fresh data
+        // Update all properties of current playerProgress with fresh data
+        updatePlayerProgress(with: freshProgress)
+        
+        // Re-setup SettingsViewModel with fresh progress
+        SettingsViewModel.shared.setPlayerProgress(playerProgress)
+    }
+    
+    private func updatePlayerProgress(with freshProgress: PlayerProgressViewModel) {
         playerProgress.coins = freshProgress.coins
         playerProgress.levels = freshProgress.levels
         playerProgress.achievements = freshProgress.achievements
@@ -197,9 +175,6 @@ struct SettingsView: View {
         playerProgress.totalGamesPlayed = freshProgress.totalGamesPlayed
         playerProgress.totalLevelsCompleted = freshProgress.totalLevelsCompleted
         playerProgress.perfectGames = freshProgress.perfectGames
-        
-        // Restart audio with fresh settings
-        setupAudioSettings()
     }
 }
 

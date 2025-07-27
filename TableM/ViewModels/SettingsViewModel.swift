@@ -9,6 +9,9 @@ import AVFoundation
 import SwiftUI
 
 class SettingsViewModel: NSObject, ObservableObject {
+    // Singleton instance
+    static let shared = SettingsViewModel()
+    
     // Audio Players
     private var musicPlayer: AVAudioPlayer?
     private var soundPlayer: AVAudioPlayer?
@@ -21,13 +24,58 @@ class SettingsViewModel: NSObject, ObservableObject {
     // Audio Session
     private var audioSession = AVAudioSession.sharedInstance()
     
+    // Player Progress Reference
+    var playerProgress: PlayerProgressViewModel?
+    private var isInitialized = false
+    
     override init() {
         super.init()
         setupAudioSession()
     }
     
+    // MARK: - Player Progress Integration
+    func setPlayerProgress(_ progress: PlayerProgressViewModel) {
+        self.playerProgress = progress
+        
+        if !isInitialized {
+            // First time initialization
+            currentMusicVolume = Float(progress.musicVolume)
+            currentSoundVolume = Float(progress.soundVolume)
+            
+            setupAudio()
+            applyCurrentSettings()
+            isInitialized = true
+        } else {
+            // Update reference but don't recreate audio or restart music
+            updateVolumeSettings()
+        }
+    }
+    
+    private func updateVolumeSettings() {
+        guard let progress = playerProgress else { return }
+        
+        currentMusicVolume = Float(progress.musicVolume)
+        currentSoundVolume = Float(progress.soundVolume)
+        
+        musicPlayer?.volume = currentMusicVolume
+        soundPlayer?.volume = currentSoundVolume
+    }
+    
+    private func applyCurrentSettings() {
+        guard let progress = playerProgress else { return }
+        
+        updateMusicVolume(progress.musicVolume)
+        updateSoundVolume(progress.soundVolume)
+        
+        if progress.isMusicEnabled && progress.musicVolume > 0 {
+            startBackgroundMusic()
+        } else {
+            stopBackgroundMusic()
+        }
+    }
+    
     // MARK: - Audio Session Setup
-    func setupAudioSession() {
+    private func setupAudioSession() {
         do {
             try audioSession.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
             try audioSession.setActive(true)
@@ -44,7 +92,7 @@ class SettingsViewModel: NSObject, ObservableObject {
     
     private func setupBackgroundMusic() {
         guard let musicURL = Bundle.main.url(forResource: "music", withExtension: "mp3") else {
-            print("Could not find music.mp3 file")
+            print("Could not find background_music.mp3 file")
             return
         }
         
@@ -61,7 +109,7 @@ class SettingsViewModel: NSObject, ObservableObject {
     
     private func setupSoundEffects() {
         guard let soundURL = Bundle.main.url(forResource: "sound", withExtension: "mp3") else {
-            print("Could not find sound.mp3 file")
+            print("Could not find button_click.mp3 file")
             return
         }
         
@@ -76,12 +124,11 @@ class SettingsViewModel: NSObject, ObservableObject {
     
     // MARK: - Background Music Control
     func startBackgroundMusic() {
-        guard let musicPlayer = musicPlayer else {
-            setupBackgroundMusic()
-            return
-        }
+        guard let musicPlayer = musicPlayer,
+              let progress = playerProgress,
+              progress.isMusicEnabled && progress.musicVolume > 0 else { return }
         
-        if !musicPlayer.isPlaying && currentMusicVolume > 0 {
+        if !musicPlayer.isPlaying {
             musicPlayer.play()
             isMusicPlaying = true
         }
@@ -98,9 +145,11 @@ class SettingsViewModel: NSObject, ObservableObject {
     }
     
     func resumeBackgroundMusic() {
-        guard let musicPlayer = musicPlayer else { return }
+        guard let musicPlayer = musicPlayer,
+              let progress = playerProgress,
+              progress.isMusicEnabled && progress.musicVolume > 0 else { return }
         
-        if !musicPlayer.isPlaying && currentMusicVolume > 0 {
+        if !musicPlayer.isPlaying {
             musicPlayer.play()
             isMusicPlaying = true
         }
@@ -111,17 +160,28 @@ class SettingsViewModel: NSObject, ObservableObject {
         currentMusicVolume = floatVolume
         musicPlayer?.volume = floatVolume
         
-        // Stop music if volume is 0, start if volume > 0
-        if floatVolume == 0 {
+        guard let progress = playerProgress else { return }
+        
+        // Update player progress
+        progress.musicVolume = volume
+        progress.isMusicEnabled = volume > 0
+        
+        // Save changes
+        DataManager.shared.savePlayerProgress(progress)
+        
+        // Control music playback
+        if floatVolume == 0 || !progress.isMusicEnabled {
             stopBackgroundMusic()
-        } else if floatVolume > 0 && !isMusicPlaying {
+        } else if floatVolume > 0 && progress.isMusicEnabled && !isMusicPlaying {
             startBackgroundMusic()
         }
     }
     
     // MARK: - Sound Effects Control
     func playButtonSound() {
-        guard let soundPlayer = soundPlayer, currentSoundVolume > 0 else { return }
+        guard let soundPlayer = soundPlayer,
+              let progress = playerProgress,
+              progress.isSoundEnabled && progress.soundVolume > 0 else { return }
         
         soundPlayer.stop()
         soundPlayer.currentTime = 0
@@ -129,14 +189,10 @@ class SettingsViewModel: NSObject, ObservableObject {
     }
     
     func playVictorySound() {
-        // For now, use the same sound effect
-        // In a real app, you might have different sound files
         playButtonSound()
     }
     
     func playDefeatSound() {
-        // For now, use the same sound effect
-        // In a real app, you might have different sound files
         playButtonSound()
     }
     
@@ -144,6 +200,15 @@ class SettingsViewModel: NSObject, ObservableObject {
         let floatVolume = Float(volume)
         currentSoundVolume = floatVolume
         soundPlayer?.volume = floatVolume
+        
+        guard let progress = playerProgress else { return }
+        
+        // Update player progress
+        progress.soundVolume = volume
+        progress.isSoundEnabled = volume > 0
+        
+        // Save changes
+        DataManager.shared.savePlayerProgress(progress)
     }
     
     // MARK: - Complete Audio Control
@@ -158,19 +223,29 @@ class SettingsViewModel: NSObject, ObservableObject {
     }
     
     func resumeAllAudio() {
-        if currentMusicVolume > 0 {
+        guard let progress = playerProgress else { return }
+        
+        if progress.isMusicEnabled && progress.musicVolume > 0 {
             resumeBackgroundMusic()
         }
     }
     
-    func applyAudioSettings(musicVolume: Double, soundVolume: Double, musicEnabled: Bool, soundEnabled: Bool) {
-        updateMusicVolume(musicEnabled ? musicVolume : 0.0)
-        updateSoundVolume(soundEnabled ? soundVolume : 0.0)
+    func initializeWithDefaults() {
+        guard let progress = playerProgress else { return }
         
-        if musicEnabled && musicVolume > 0 {
+        // Set up audio with current settings
+        setupAudio()
+        
+        // Apply settings
+        currentMusicVolume = Float(progress.musicVolume)
+        currentSoundVolume = Float(progress.soundVolume)
+        
+        musicPlayer?.volume = currentMusicVolume
+        soundPlayer?.volume = currentSoundVolume
+        
+        // Start music if enabled
+        if progress.isMusicEnabled && progress.musicVolume > 0 {
             startBackgroundMusic()
-        } else {
-            stopBackgroundMusic()
         }
     }
     
@@ -186,65 +261,11 @@ class SettingsViewModel: NSObject, ObservableObject {
     func refreshAudioPlayers() {
         stopAllAudio()
         setupAudio()
-    }
-    
-    // MARK: - App Lifecycle Methods
-    func handleAppWillResignActive() {
-        // Called when app is about to become inactive (like receiving a call)
-        pauseAllAudio()
-    }
-    
-    func handleAppDidEnterBackground() {
-        // Called when app enters background
-        stopAllAudio()
-    }
-    
-    func handleAppWillEnterForeground() {
-        // Called when app is about to enter foreground
-        setupAudioSession()
-        if currentMusicVolume > 0 {
-            resumeBackgroundMusic()
-        }
-    }
-    
-    func handleAppDidBecomeActive() {
-        // Called when app becomes active
-        if currentMusicVolume > 0 && !isMusicPlaying {
-            startBackgroundMusic()
-        }
-    }
-    
-    // MARK: - Audio Interruption Handling
-    @objc private func handleAudioInterruption(notification: Notification) {
-        guard let interruptionType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt else {
-            return
-        }
-        
-        switch interruptionType {
-        case AVAudioSession.InterruptionType.began.rawValue:
-            // Audio interruption began (like phone call)
-            pauseAllAudio()
-            
-        case AVAudioSession.InterruptionType.ended.rawValue:
-            // Audio interruption ended
-            if let optionsValue = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt {
-                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
-                if options.contains(.shouldResume) {
-                    // Resume audio if appropriate
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        self.resumeAllAudio()
-                    }
-                }
-            }
-            
-        default:
-            break
-        }
+        applyCurrentSettings()
     }
     
     deinit {
         stopAllAudio()
-        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -274,9 +295,4 @@ extension SettingsViewModel: AVAudioPlayerDelegate {
             }
         }
     }
-}
-
-// MARK: - Singleton for Global Access
-extension SettingsViewModel {
-    static let shared = SettingsViewModel()
 }

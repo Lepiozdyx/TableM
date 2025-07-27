@@ -57,14 +57,7 @@ struct GameView: View {
         }
         .navigationBarHidden(true)
         .onChange(of: gameViewModel.gameState) { newState in
-            switch newState {
-            case .won:
-                showingVictory = true
-            case .lost:
-                showingGameOver = true
-            case .playing:
-                break
-            }
+            handleGameStateChange(newState)
         }
         .sheet(isPresented: $showingVictory) {
             VictoryView(
@@ -74,16 +67,19 @@ struct GameView: View {
                 hasNextLevel: gameViewModel.shouldShowNextLevelButton,
                 hasSecretStory: gameViewModel.shouldShowSecretStoryButton,
                 onNextLevel: {
+                    SettingsViewModel.shared.playButtonSound()
                     if let _ = gameViewModel.nextLevel() {
                         // Navigate to next level ?
                         showingVictory = false
                     }
                 },
                 onMenu: {
+                    SettingsViewModel.shared.playButtonSound()
                     showingVictory = false
                     dismiss()
                 },
                 onSecretStory: {
+                    SettingsViewModel.shared.playButtonSound()
                     showingVictory = false
                     showingSecretStory = true
                 }
@@ -94,10 +90,12 @@ struct GameView: View {
                 level: gameViewModel.currentLevel,
                 secretCombination: gameViewModel.secretCombination,
                 onTryAgain: {
+                    SettingsViewModel.shared.playButtonSound()
                     showingGameOver = false
                     gameViewModel.restartLevel()
                 },
                 onMenu: {
+                    SettingsViewModel.shared.playButtonSound()
                     showingGameOver = false
                     dismiss()
                 }
@@ -115,7 +113,10 @@ struct GameView: View {
     private var topNavigationBar: some View {
         HStack {
             // Settings Button
-            Button(action: { showingSettings = true }) {
+            Button(action: {
+                SettingsViewModel.shared.playButtonSound()
+                showingSettings = true
+            }) {
                 Image(.btn1)
                     .resizable()
                     .frame(width: 50, height: 50)
@@ -130,7 +131,10 @@ struct GameView: View {
             Spacer()
             
             // Back/Home Button
-            Button(action: { dismiss() }) {
+            Button(action: {
+                SettingsViewModel.shared.playButtonSound()
+                dismiss()
+            }) {
                 Image(.btn1)
                     .resizable()
                     .frame(width: 50, height: 50)
@@ -149,6 +153,7 @@ struct GameView: View {
         HStack(spacing: 8) {
             ForEach(0..<4, id: \.self) { index in
                 Button(action: {
+                    SettingsViewModel.shared.playButtonSound()
                     gameViewModel.selectPosition(index)
                 }) {
                     ZStack {
@@ -180,6 +185,7 @@ struct GameView: View {
             // Check button (appears when row is complete)
             if gameViewModel.canCheckRow() {
                 Button(action: {
+                    SettingsViewModel.shared.playButtonSound()
                     gameViewModel.checkCurrentRow()
                 }) {
                     Text("Check")
@@ -216,6 +222,7 @@ struct GameView: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 4), spacing: 2) {
             ForEach(GameColor.allCases, id: \.self) { color in
                 Button(action: {
+                    SettingsViewModel.shared.playButtonSound()
                     gameViewModel.selectColor(color)
                 }) {
                     Circle()
@@ -238,6 +245,20 @@ struct GameView: View {
             }
         }
         .frame(maxWidth: 300)
+    }
+    
+    // MARK: - Game State Handling
+    private func handleGameStateChange(_ newState: GameState) {
+        switch newState {
+        case .won:
+            SettingsViewModel.shared.playVictorySound()
+            showingVictory = true
+        case .lost:
+            SettingsViewModel.shared.playDefeatSound()
+            showingGameOver = true
+        case .playing:
+            break
+        }
     }
 }
 

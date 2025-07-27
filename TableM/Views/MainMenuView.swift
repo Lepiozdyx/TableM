@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct MainMenuView: View {
-    @StateObject private var viewModel = PlayerProgressViewModel()
-    
-//    @Environment(\.scenePhase) private var phase
+    @StateObject private var viewModel = DataManager.shared.loadPlayerProgress()
+    @Environment(\.scenePhase) private var scenePhase
     
     @State private var navigateToLevelSelection = false
     @State private var showingShop = false
@@ -57,6 +56,12 @@ struct MainMenuView: View {
             .sheet(isPresented: $showingDailyReward) {
                 DailyRewardView(playerProgress: viewModel)
             }
+            .onAppear {
+                setupAudio()
+            }
+            .onChange(of: scenePhase) { newPhase in
+                handleScenePhaseChange(newPhase)
+            }
         }
     }
     
@@ -69,7 +74,10 @@ struct MainMenuView: View {
             Spacer()
             
             // Settings button
-            Button(action: { showingSettings = true }) {
+            Button(action: {
+                SettingsViewModel.shared.playButtonSound()
+                showingSettings = true
+            }) {
                 Image(.btn1)
                     .resizable()
                     .frame(width: 50, height: 50)
@@ -88,7 +96,10 @@ struct MainMenuView: View {
     private var menuButtonsSection: some View {
         VStack(spacing: 30) {
             // Play button (main action)
-            Button(action: { navigateToLevelSelection = true }) {
+            Button(action: {
+                SettingsViewModel.shared.playButtonSound()
+                navigateToLevelSelection = true
+            }) {
                 Text("Play")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
@@ -100,7 +111,10 @@ struct MainMenuView: View {
             }
             
             // Shop button
-            Button(action: { showingShop = true }) {
+            Button(action: {
+                SettingsViewModel.shared.playButtonSound()
+                showingShop = true
+            }) {
                 Text("Shop")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
@@ -112,7 +126,10 @@ struct MainMenuView: View {
             }
             
             // Achievements button
-            Button(action: { showingAchievements = true }) {
+            Button(action: {
+                SettingsViewModel.shared.playButtonSound()
+                showingAchievements = true
+            }) {
                 Text("Achievements")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
@@ -127,7 +144,10 @@ struct MainMenuView: View {
     
     // MARK: - Daily Reward Button
     private var dailyRewardButton: some View {
-        Button(action: { showingDailyReward = true }) {
+        Button(action: {
+            SettingsViewModel.shared.playButtonSound()
+            showingDailyReward = true
+        }) {
             Image(systemName: "gift.fill")
                 .font(.system(size: 32))
                 .foregroundColor(.indigo)
@@ -138,6 +158,27 @@ struct MainMenuView: View {
                 )
         }
         .padding()
+    }
+    
+    // MARK: - Audio Management
+    private func setupAudio() {
+        // Initialize SettingsViewModel with player progress
+        SettingsViewModel.shared.setPlayerProgress(viewModel)
+    }
+    
+    private func handleScenePhaseChange(_ newPhase: ScenePhase) {
+        switch newPhase {
+        case .active:
+            if viewModel.isMusicEnabled && viewModel.musicVolume > 0 {
+                SettingsViewModel.shared.startBackgroundMusic()
+            } else {
+                SettingsViewModel.shared.stopBackgroundMusic()
+            }
+        case .background, .inactive:
+            SettingsViewModel.shared.stopBackgroundMusic()
+        @unknown default:
+            break
+        }
     }
 }
 
