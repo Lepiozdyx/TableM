@@ -57,7 +57,18 @@ enum GameLocation: String, CaseIterable, Codable {
     }
     
     var backgroundImage: String {
-        return "background_\(rawValue)"
+        switch self {
+        case .france:
+            return "versailles"
+        case .japan:
+            return "kyoto"
+        case .brazil:
+            return "amazon"
+        case .egypt:
+            return "pyramid"
+        case .usa:
+            return "siliconvalley"
+        }
     }
     
     var professorComment: String {

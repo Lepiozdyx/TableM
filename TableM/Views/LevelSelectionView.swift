@@ -17,6 +17,8 @@ struct LevelSelectionView: View {
     
     var body: some View {
         ZStack {
+            // Background
+            BackgroundView(playerProgress: playerProgress)
             
             VStack(spacing: 0) {
                 // Top Navigation
@@ -24,18 +26,10 @@ struct LevelSelectionView: View {
                 
                 Spacer()
                 
-                // Location Title
-                Text(selectedLocation.displayName)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding(.top, 20)
+                // Location Tile
+                locationTileView
                 
-                // Location Image
-                locationImageView
-                
-                // Level Selection
-                levelSelectionView
+                Spacer()
                 
                 // Location Navigation
                 locationNavigationView
@@ -70,34 +64,48 @@ struct LevelSelectionView: View {
         HStack {
             Spacer()
             
-            // Home Button
+            // Back/Home Button
             Button(action: { dismiss() }) {
-                Image(systemName: "house.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.home)
+                            .resizable()
+                            .padding(10)
+                    }
             }
         }
         .padding()
     }
     
+    // MARK: - Location Tile View
+    private var locationTileView: some View {
+        VStack {
+            // Location Title
+            Text(selectedLocation.displayName)
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+            
+            // Location Image
+            locationImageView
+            
+            // Level Selection
+            levelSelectionView
+        }
+        .padding()
+        .background(
+            Image(.underlay1)
+                .resizable()
+        )
+    }
+    
     // MARK: - Location Image View
     private var locationImageView: some View {
-        RoundedRectangle(cornerRadius: 20)
-            .fill(Color.gray.opacity(0.5))
-            .frame(width: 300, height: 200)
-            .overlay(
-                Image(selectedLocation.backgroundImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.white, lineWidth: 2)
-            )
+        Image(selectedLocation.backgroundImage)
+            .resizable()
+            .clipShape(RoundedRectangle(cornerRadius: 15))
+            .frame(width: 200, height: 350)
     }
     
     // MARK: - Level Selection View
@@ -122,39 +130,34 @@ struct LevelSelectionView: View {
                 navigateToGame = true
             }
         } label: {
-            ZStack {
-                Circle()
-                    .fill(buttonBackgroundColor(isUnlocked: isUnlocked, isCompleted: isCompleted))
-                    .frame(width: 50, height: 50)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white, lineWidth: 2)
-                    )
-                
-                if isUnlocked {
-                    if isCompleted {
-                        // Checkmark for completed levels
-                        Image(systemName: "checkmark")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+            Image(buttonImageName(isUnlocked: isUnlocked, isCompleted: isCompleted))
+                .resizable()
+                .frame(width: 50, height: 50)
+                .overlay {
+                    if isUnlocked {
+                        if isCompleted {
+                            // Checkmark for completed levels
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 20))
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                        } else {
+                            // Level number for unlocked levels
+                            Text("\(levelNumber)")
+                                .font(.system(size: 22, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                        }
                     } else {
-                        // Level number for unlocked levels
-                        Text("\(levelNumber)")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+                        // Lock for locked levels
+                        Image(.lock)
+                            .resizable()
+                            .scaledToFit()
+                            .padding(14)
                     }
-                } else {
-                    // Lock for locked levels
-                    Image(systemName: "lock.fill")
-                        .font(.title3)
-                        .foregroundColor(.white)
                 }
-            }
         }
         .disabled(!isUnlocked)
-        .scaleEffect(isUnlocked ? 1.0 : 0.8)
+        .scaleEffect(isUnlocked ? 1.0 : 0.9)
         .animation(.easeInOut(duration: 0.2), value: isUnlocked)
     }
     
@@ -164,39 +167,43 @@ struct LevelSelectionView: View {
             // Previous Location Button
             Button(action: previousLocation) {
                 Image(systemName: "chevron.left")
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(.system(size: 20))
                     .foregroundColor(.white)
                     .frame(width: 50, height: 50)
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(Circle())
+                    .background(
+                        !canGoToPreviousLocation
+                        ? Image(.btn5).resizable()
+                        : Image(.btn4).resizable()
+                    )
             }
             .disabled(!canGoToPreviousLocation)
-            .opacity(canGoToPreviousLocation ? 1.0 : 0.3)
+            .opacity(canGoToPreviousLocation ? 1.0 : 0.6)
             
             // Next Location Button
             Button(action: nextLocation) {
                 Image(systemName: "chevron.right")
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(.system(size: 20))
                     .foregroundColor(.white)
                     .frame(width: 50, height: 50)
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(Circle())
+                    .background(
+                        !canGoToPreviousLocation
+                        ? Image(.btn5).resizable()
+                        : Image(.btn4).resizable()
+                    )
             }
             .disabled(!canGoToNextLocation || !hasNextLocationUnlocked)
-            .opacity((canGoToNextLocation && hasNextLocationUnlocked) ? 1.0 : 0.3)
+            .opacity((canGoToNextLocation && hasNextLocationUnlocked) ? 1.0 : 0.6)
         }
     }
     
     // MARK: - Helper Methods
-    private func buttonBackgroundColor(isUnlocked: Bool, isCompleted: Bool) -> Color {
+    private func buttonImageName(isUnlocked: Bool, isCompleted: Bool) -> ImageResource {
         if !isUnlocked {
-            return Color.gray.opacity(0.6)
+            return .btn5
         } else if isCompleted {
-            return Color.green.opacity(0.8)
+            return .btn4
         } else {
-            return Color.blue.opacity(0.8)
+            return .btn4
         }
     }
     

@@ -77,17 +77,9 @@ struct SettingsView: View {
             VStack(spacing: 25) {
                 // Music Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Music")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                        
-                        Spacer()
-                        
-                        Text("\(Int(playerProgress.musicVolume * 100))%")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                    }
+                    Text("Music")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
                     
                     Slider(
                         value: $playerProgress.musicVolume,
@@ -110,17 +102,9 @@ struct SettingsView: View {
                 
                 // Sound Effects Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Sound")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                        
-                        Spacer()
-                        
-                        Text("\(Int(playerProgress.soundVolume * 100))%")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                    }
+                    Text("Sound")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
                     
                     Slider(
                         value: $playerProgress.soundVolume,
