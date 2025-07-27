@@ -90,6 +90,9 @@ class AppStateManager: ObservableObject {
     func purchaseShopItem(_ item: ShopItem) -> Bool {
         let success = playerProgress.purchaseItem(item)
         if success {
+            DispatchQueue.main.async { [weak self] in
+                self?.objectWillChange.send()
+            }
             saveProgress()
         }
         return success
@@ -97,17 +100,28 @@ class AppStateManager: ObservableObject {
     
     func selectBackground(_ backgroundId: String) {
         playerProgress.selectBackground(backgroundId)
+        // FIXED: Force UI update immediately on main thread
+        DispatchQueue.main.async { [weak self] in
+            self?.objectWillChange.send()
+        }
         saveProgress()
     }
     
     func selectSkin(_ skinId: String) {
         playerProgress.selectSkin(skinId)
+        // FIXED: Force UI update immediately on main thread
+        DispatchQueue.main.async { [weak self] in
+            self?.objectWillChange.send()
+        }
         saveProgress()
     }
     
     func claimAchievement(_ type: AchievementType) -> Int {
         let reward = playerProgress.claimAchievement(type)
         if reward > 0 {
+            DispatchQueue.main.async { [weak self] in
+                self?.objectWillChange.send()
+            }
             saveProgress()
         }
         return reward
@@ -116,6 +130,9 @@ class AppStateManager: ObservableObject {
     func claimDailyReward() -> Int {
         let reward = playerProgress.claimDailyReward()
         if reward > 0 {
+            DispatchQueue.main.async { [weak self] in
+                self?.objectWillChange.send()
+            }
             saveProgress()
         }
         return reward
@@ -139,6 +156,13 @@ class AppStateManager: ObservableObject {
         playerProgress.isSoundEnabled = volume > 0
         SettingsViewModel.shared.updateSoundVolume(volume)
         saveProgress()
+    }
+    
+    // MARK: - UI Update Helper
+    private func forceUIUpdate() {
+        DispatchQueue.main.async { [weak self] in
+            self?.objectWillChange.send()
+        }
     }
     
     // MARK: - App Lifecycle

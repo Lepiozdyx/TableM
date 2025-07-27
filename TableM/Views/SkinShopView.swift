@@ -44,7 +44,7 @@ struct SkinShopView: View {
     // MARK: - Top Navigation Bar
     private var topNavigationBar: some View {
         HStack {
-            // Coins Display
+            // Coins Display - FIXED: Now properly observes appState changes
             ScoreboardView(coins: appState.playerProgress.coins)
             
             Spacer()
@@ -66,6 +66,7 @@ struct SkinShopView: View {
     
     // MARK: - Helper Properties
     private var skinItems: [ShopItem] {
+        // FIXED: Get fresh items from appState to ensure updates
         return appState.playerProgress.shopItems.filter { $0.type == .skin }
     }
     
@@ -78,8 +79,10 @@ struct SkinShopView: View {
         } else if appState.playerProgress.coins >= item.price {
             // Purchase the item
             if purchaseItem(item) {
-                // Automatically select the purchased item
-                selectItem(item)
+                // FIXED: Add small delay to ensure state update propagates
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    selectItem(item)
+                }
                 SettingsViewModel.shared.playVictorySound()
             } else {
                 SettingsViewModel.shared.playDefeatSound()

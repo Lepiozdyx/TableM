@@ -67,9 +67,10 @@ struct GameView: View {
                 hasSecretStory: gameViewModel.shouldShowSecretStoryButton,
                 onNextLevel: {
                     SettingsViewModel.shared.playButtonSound()
-                    if let _ = gameViewModel.nextLevel() {
-                        // Navigate to next level ?
+                    if let nextLevel = gameViewModel.nextLevel() {
                         showingVictory = false
+                        // FIXED: Properly transition to next level
+                        gameViewModel.startNewLevel(nextLevel)
                     }
                 },
                 onMenu: {

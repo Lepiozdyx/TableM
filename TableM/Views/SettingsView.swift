@@ -25,15 +25,13 @@ struct SettingsView: View {
                     
                     // Audio Settings Section
                     audioSettingsSection
+                        .padding()
                     
                     Spacer()
                     
                     // Reset Progress Button
                     resetProgressButton
-                    
-                    Spacer()
                 }
-                .padding()
             }
             .navigationBarHidden(true)
         }
@@ -69,10 +67,8 @@ struct SettingsView: View {
     
     // MARK: - Audio Settings Section
     private var audioSettingsSection: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 40) {
             sectionHeader("Settings")
-                .padding(.top, 20)
-                .padding(.bottom, 30)
             
             VStack(spacing: 25) {
                 // Music Settings
@@ -125,7 +121,7 @@ struct SettingsView: View {
             }
         }
         .padding(.horizontal, 30)
-        .padding(.vertical, 40)
+        .padding(.vertical, 80)
         .background(
             Image(.underlay1)
                 .resizable()

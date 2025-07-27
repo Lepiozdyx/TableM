@@ -57,6 +57,13 @@ class GameViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Level Transition
+    func startNewLevel(_ newLevel: GameLevel) {
+        currentLevel = newLevel
+        isFirstLevel = false
+        setupGame()
+    }
+    
     private func generateSecretCombination() {
         secretCombination = []
         for _ in 0..<4 {
@@ -178,8 +185,7 @@ class GameViewModel: ObservableObject {
     func showProfessorMessage(_ message: String) {
         professorState = .speaking(message: message)
         
-        // Auto-hide after 3 seconds (unless it's onboarding)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
             if case .speaking(_, let isOnboarding) = self.professorState, !isOnboarding {
                 self.professorState = .hidden
             }

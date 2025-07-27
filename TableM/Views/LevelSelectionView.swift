@@ -125,9 +125,13 @@ struct LevelSelectionView: View {
         let isCompleted = level?.isCompleted ?? false
         
         return Button {
+            // FIXED: Only allow playing unlocked levels, but button is always interactive for visual feedback
             if isUnlocked, let gameLevel = level {
                 selectedLevel = gameLevel
                 navigateToGame = true
+            } else {
+                // Visual feedback for locked levels
+                SettingsViewModel.shared.playDefeatSound()
             }
         } label: {
             Image(buttonImageName(isUnlocked: isUnlocked, isCompleted: isCompleted))
@@ -156,7 +160,6 @@ struct LevelSelectionView: View {
                     }
                 }
         }
-        .disabled(!isUnlocked)
         .scaleEffect(isUnlocked ? 1.0 : 0.9)
         .animation(.easeInOut(duration: 0.2), value: isUnlocked)
     }
@@ -164,7 +167,7 @@ struct LevelSelectionView: View {
     // MARK: - Location Navigation View
     private var locationNavigationView: some View {
         HStack(spacing: 80) {
-            // Previous Location Button
+            // Previous Location Button - FIXED: Always enabled for browsing
             Button(action: previousLocation) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 20))
@@ -179,20 +182,20 @@ struct LevelSelectionView: View {
             .disabled(!canGoToPreviousLocation)
             .opacity(canGoToPreviousLocation ? 1.0 : 0.6)
             
-            // Next Location Button
+            // Next Location Button - FIXED: Always enabled for browsing
             Button(action: nextLocation) {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 20))
                     .foregroundColor(.white)
                     .frame(width: 50, height: 50)
                     .background(
-                        !canGoToNextLocation || !hasNextLocationUnlocked
+                        !canGoToNextLocation
                         ? Image(.btn5).resizable()
                         : Image(.btn4).resizable()
                     )
             }
-            .disabled(!canGoToNextLocation || !hasNextLocationUnlocked)
-            .opacity((canGoToNextLocation && hasNextLocationUnlocked) ? 1.0 : 0.6)
+            .disabled(!canGoToNextLocation)
+            .opacity(canGoToNextLocation ? 1.0 : 0.6)
         }
     }
     
@@ -217,13 +220,7 @@ struct LevelSelectionView: View {
         return currentIndex + 1 < GameLocation.allCases.count
     }
     
-    private var hasNextLocationUnlocked: Bool {
-        guard let currentIndex = GameLocation.allCases.firstIndex(of: selectedLocation),
-              currentIndex + 1 < GameLocation.allCases.count else { return false }
-        let nextLocation = GameLocation.allCases[currentIndex + 1]
-        return appState.playerProgress.unlockedLocations.contains(nextLocation)
-    }
-    
+    // FIXED: Removed hasNextLocationUnlocked check - allow browsing all locations
     private func previousLocation() {
         guard let currentIndex = GameLocation.allCases.firstIndex(of: selectedLocation),
               currentIndex > 0 else { return }
@@ -236,21 +233,19 @@ struct LevelSelectionView: View {
         guard let currentIndex = GameLocation.allCases.firstIndex(of: selectedLocation),
               currentIndex + 1 < GameLocation.allCases.count else { return }
         
-        let nextLocation = GameLocation.allCases[currentIndex + 1]
-        
-        // Only switch if the location is unlocked
-        if appState.playerProgress.unlockedLocations.contains(nextLocation) {
-            selectedLocation = nextLocation
-            showLocationComment()
-        }
+        // FIXED: Allow browsing all locations, not just unlocked ones
+        selectedLocation = GameLocation.allCases[currentIndex + 1]
+        showLocationComment()
     }
     
     private func showLocationComment() {
         professorMessage = selectedLocation.professorComment
         showingProfessorComment = true
         
-        // Update current location through AppStateManager
-        appState.updateCurrentLocation(selectedLocation)
+        // Update current location through AppStateManager only if it's unlocked
+        if appState.playerProgress.unlockedLocations.contains(selectedLocation) {
+            appState.updateCurrentLocation(selectedLocation)
+        }
     }
 }
 

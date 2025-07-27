@@ -44,7 +44,6 @@ struct BackgroundShopView: View {
     // MARK: - Top Navigation Bar
     private var topNavigationBar: some View {
         HStack {
-            // Coins Display
             ScoreboardView(coins: appState.playerProgress.coins)
             
             Spacer()
@@ -78,8 +77,9 @@ struct BackgroundShopView: View {
         } else if appState.playerProgress.coins >= item.price {
             // Purchase the item
             if purchaseItem(item) {
-                // Automatically select the purchased item
-                selectItem(item)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    selectItem(item)
+                }
                 SettingsViewModel.shared.playVictorySound()
             } else {
                 SettingsViewModel.shared.playDefeatSound()
