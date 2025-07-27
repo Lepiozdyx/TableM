@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct SkinShopView: View {
-    @ObservedObject var playerProgress: PlayerProgressViewModel
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ZStack {
             // Background
-            BackgroundView(playerProgress: playerProgress)
+            BackgroundView(playerProgress: appState.playerProgress)
             
             VStack(spacing: 0) {
                 // Top Navigation Bar
@@ -26,8 +26,8 @@ struct SkinShopView: View {
                         ForEach(skinItems, id: \.id) { item in
                             SkinItemCard(
                                 item: item,
-                                isSelected: playerProgress.selectedSkin == item.id,
-                                canAfford: playerProgress.coins >= item.price,
+                                isSelected: appState.playerProgress.selectedSkin == item.id,
+                                canAfford: appState.playerProgress.coins >= item.price,
                                 onAction: {
                                     handleItemAction(item)
                                 }
@@ -45,7 +45,7 @@ struct SkinShopView: View {
     private var topNavigationBar: some View {
         HStack {
             // Coins Display
-            ScoreboardView(coins: playerProgress.coins)
+            ScoreboardView(coins: appState.playerProgress.coins)
             
             Spacer()
             
@@ -66,7 +66,7 @@ struct SkinShopView: View {
     
     // MARK: - Helper Properties
     private var skinItems: [ShopItem] {
-        return playerProgress.shopItems.filter { $0.type == .skin }
+        return appState.playerProgress.shopItems.filter { $0.type == .skin }
     }
     
     // MARK: - Helper Methods
@@ -75,7 +75,7 @@ struct SkinShopView: View {
             // Select the item
             selectItem(item)
             SettingsViewModel.shared.playButtonSound()
-        } else if playerProgress.coins >= item.price {
+        } else if appState.playerProgress.coins >= item.price {
             // Purchase the item
             if purchaseItem(item) {
                 // Automatically select the purchased item
@@ -91,20 +91,11 @@ struct SkinShopView: View {
     }
     
     private func selectItem(_ item: ShopItem) {
-        playerProgress.selectSkin(item.id)
-        saveChanges()
+        appState.selectSkin(item.id)
     }
     
     private func purchaseItem(_ item: ShopItem) -> Bool {
-        let success = playerProgress.purchaseItem(item)
-        if success {
-            saveChanges()
-        }
-        return success
-    }
-    
-    private func saveChanges() {
-        DataManager.shared.savePlayerProgress(playerProgress)
+        return appState.purchaseShopItem(item)
     }
 }
 
@@ -212,5 +203,5 @@ struct SkinItemCard: View {
 }
 
 #Preview {
-    SkinShopView(playerProgress: PlayerProgressViewModel())
+    SkinShopView()
 }

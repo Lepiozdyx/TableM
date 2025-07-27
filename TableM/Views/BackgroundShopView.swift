@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct BackgroundShopView: View {
-    @ObservedObject var playerProgress: PlayerProgressViewModel
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ZStack {
             // Background
-            BackgroundView(playerProgress: playerProgress)
+            BackgroundView(playerProgress: appState.playerProgress)
             
             VStack(spacing: 0) {
                 // Top Navigation Bar
@@ -26,8 +26,8 @@ struct BackgroundShopView: View {
                         ForEach(backgroundItems, id: \.id) { item in
                             BackgroundItemCard(
                                 item: item,
-                                isSelected: playerProgress.selectedBackground == item.id,
-                                canAfford: playerProgress.coins >= item.price,
+                                isSelected: appState.playerProgress.selectedBackground == item.id,
+                                canAfford: appState.playerProgress.coins >= item.price,
                                 onAction: {
                                     handleItemAction(item)
                                 }
@@ -45,7 +45,7 @@ struct BackgroundShopView: View {
     private var topNavigationBar: some View {
         HStack {
             // Coins Display
-            ScoreboardView(coins: playerProgress.coins)
+            ScoreboardView(coins: appState.playerProgress.coins)
             
             Spacer()
             
@@ -66,7 +66,7 @@ struct BackgroundShopView: View {
     
     // MARK: - Helper Properties
     private var backgroundItems: [ShopItem] {
-        return playerProgress.shopItems.filter { $0.type == .background }
+        return appState.playerProgress.shopItems.filter { $0.type == .background }
     }
     
     // MARK: - Helper Methods
@@ -75,7 +75,7 @@ struct BackgroundShopView: View {
             // Select the item
             selectItem(item)
             SettingsViewModel.shared.playButtonSound()
-        } else if playerProgress.coins >= item.price {
+        } else if appState.playerProgress.coins >= item.price {
             // Purchase the item
             if purchaseItem(item) {
                 // Automatically select the purchased item
@@ -91,20 +91,11 @@ struct BackgroundShopView: View {
     }
     
     private func selectItem(_ item: ShopItem) {
-        playerProgress.selectBackground(item.id)
-        saveChanges()
+        appState.selectBackground(item.id)
     }
     
     private func purchaseItem(_ item: ShopItem) -> Bool {
-        let success = playerProgress.purchaseItem(item)
-        if success {
-            saveChanges()
-        }
-        return success
-    }
-    
-    private func saveChanges() {
-        DataManager.shared.savePlayerProgress(playerProgress)
+        return appState.purchaseShopItem(item)
     }
 }
 
@@ -211,5 +202,5 @@ struct BackgroundItemCard: View {
 }
 
 #Preview {
-    BackgroundShopView(playerProgress: PlayerProgressViewModel())
+    BackgroundShopView()
 }

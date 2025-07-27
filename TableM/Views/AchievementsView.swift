@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct AchievementsView: View {
-    @ObservedObject var playerProgress: PlayerProgressViewModel
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationView {
             ZStack {
                 // Background
-                BackgroundView(playerProgress: playerProgress)
+                BackgroundView(playerProgress: appState.playerProgress)
                 
                 VStack(spacing: 0) {
                     // Top Navigation
@@ -24,7 +24,7 @@ struct AchievementsView: View {
                     // Achievements List
                     ScrollView {
                         VStack(spacing: 20) {
-                            ForEach(playerProgress.achievements) { achievement in
+                            ForEach(appState.playerProgress.achievements) { achievement in
                                 AchievementCard(
                                     achievement: achievement,
                                     onClaim: {
@@ -45,7 +45,7 @@ struct AchievementsView: View {
     private var topNavigationBar: some View {
         HStack {
             // Coins Display
-            ScoreboardView(coins: playerProgress.coins)
+            ScoreboardView(coins: appState.playerProgress.coins)
             
             Spacer()
             
@@ -66,10 +66,9 @@ struct AchievementsView: View {
     
     // MARK: - Helper Methods
     private func claimAchievement(_ type: AchievementType) {
-        let reward = playerProgress.claimAchievement(type)
+        let reward = appState.claimAchievement(type)
         if reward > 0 {
             SettingsViewModel.shared.playVictorySound()
-            DataManager.shared.savePlayerProgress(playerProgress)
         } else {
             SettingsViewModel.shared.playDefeatSound()
         }
@@ -159,5 +158,5 @@ struct AchievementCard: View {
 }
 
 #Preview {
-    AchievementsView(playerProgress: PlayerProgressViewModel())
+    AchievementsView()
 }

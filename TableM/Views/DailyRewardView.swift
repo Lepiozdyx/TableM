@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DailyRewardView: View {
-    @ObservedObject var playerProgress: PlayerProgressViewModel
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.dismiss) private var dismiss
     
     @State private var showingClaimAnimation = false
@@ -17,7 +17,7 @@ struct DailyRewardView: View {
         NavigationView {
             ZStack {
                 // Background
-                BackgroundView(playerProgress: playerProgress)
+                BackgroundView(playerProgress: appState.playerProgress)
                 
                 VStack(spacing: 0) {
                     // Top Navigation
@@ -28,7 +28,7 @@ struct DailyRewardView: View {
                         VStack(spacing: 30) {
                             // Daily Login Reward
                             DailyLoginCard(
-                                dailyReward: playerProgress.dailyReward,
+                                dailyReward: appState.playerProgress.dailyReward,
                                 onClaim: {
                                     claimDailyLogin()
                                 }
@@ -54,7 +54,7 @@ struct DailyRewardView: View {
     private var topNavigationBar: some View {
         HStack {
             // Coins Display
-            ScoreboardView(coins: playerProgress.coins)
+            ScoreboardView(coins: appState.playerProgress.coins)
             
             Spacer()
             
@@ -78,10 +78,10 @@ struct DailyRewardView: View {
         VStack(alignment: .leading, spacing: 15) {
             sectionHeader("Daily Tasks")
             
-            ForEach(playerProgress.dailyTasks) { task in
+            ForEach(appState.playerProgress.dailyTasks) { task in
                 DailyTaskCard(
                     task: task,
-                    playerProgress: playerProgress,
+                    playerProgress: appState.playerProgress,
                     onClaim: {
                         claimDailyTask(task.type)
                     }
@@ -138,22 +138,21 @@ struct DailyRewardView: View {
     
     // MARK: - Helper Methods
     private func claimDailyLogin() {
-        let reward = playerProgress.claimDailyReward()
+        let reward = appState.claimDailyReward()
         if reward > 0 {
             showClaimAnimation()
             SettingsViewModel.shared.playVictorySound()
-            DataManager.shared.savePlayerProgress(playerProgress)
         }
     }
     
     private func claimDailyTask(_ taskType: DailyTaskType) {
-        if let index = playerProgress.dailyTasks.firstIndex(where: { $0.type == taskType && $0.isCompleted && !$0.isClaimed }) {
-            playerProgress.dailyTasks[index].isClaimed = true
-            playerProgress.coins += taskType.reward
+        if let index = appState.playerProgress.dailyTasks.firstIndex(where: { $0.type == taskType && $0.isCompleted && !$0.isClaimed }) {
+            appState.playerProgress.dailyTasks[index].isClaimed = true
+            appState.playerProgress.coins += taskType.reward
             
+            appState.saveProgress()
             showClaimAnimation()
             SettingsViewModel.shared.playVictorySound()
-            DataManager.shared.savePlayerProgress(playerProgress)
         }
     }
     
@@ -301,5 +300,5 @@ struct DailyTaskCard: View {
 }
 
 #Preview {
-    DailyRewardView(playerProgress: PlayerProgressViewModel())
+    DailyRewardView()
 }

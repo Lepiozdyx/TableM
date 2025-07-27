@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LevelSelectionView: View {
-    @ObservedObject private var playerProgress: PlayerProgressViewModel
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.dismiss) private var dismiss
     
     @State private var selectedLocation: GameLocation
@@ -10,15 +10,14 @@ struct LevelSelectionView: View {
     @State private var navigateToGame = false
     @State private var selectedLevel: GameLevel?
     
-    init(playerProgress: PlayerProgressViewModel) {
-        self.playerProgress = playerProgress
-        self._selectedLocation = State(initialValue: playerProgress.currentLocation)
+    init() {
+        self._selectedLocation = State(initialValue: AppStateManager.shared.playerProgress.currentLocation)
     }
     
     var body: some View {
         ZStack {
             // Background
-            BackgroundView(playerProgress: playerProgress)
+            BackgroundView(playerProgress: appState.playerProgress)
             
             VStack(spacing: 0) {
                 // Top Navigation
@@ -40,7 +39,7 @@ struct LevelSelectionView: View {
             // Professor Comment Overlay
             if showingProfessorComment {
                 ProfessorOverlayView(
-                    playerProgress: playerProgress,
+                    playerProgress: appState.playerProgress,
                     message: professorMessage,
                     isOnboarding: false,
                     onNext: { },
@@ -55,7 +54,7 @@ struct LevelSelectionView: View {
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $navigateToGame) {
             if let level = selectedLevel {
-                GameView(level: level, playerProgress: playerProgress)
+                GameView(level: level)
             }
         }
     }
@@ -121,7 +120,7 @@ struct LevelSelectionView: View {
     
     // MARK: - Level Button
     private func levelButton(for levelNumber: Int) -> some View {
-        let level = playerProgress.levelForLocationAndId(location: selectedLocation, levelId: levelNumber)
+        let level = appState.playerProgress.levelForLocationAndId(location: selectedLocation, levelId: levelNumber)
         let isUnlocked = level?.isUnlocked ?? false
         let isCompleted = level?.isCompleted ?? false
         
@@ -187,7 +186,7 @@ struct LevelSelectionView: View {
                     .foregroundColor(.white)
                     .frame(width: 50, height: 50)
                     .background(
-                        !canGoToPreviousLocation
+                        !canGoToNextLocation || !hasNextLocationUnlocked
                         ? Image(.btn5).resizable()
                         : Image(.btn4).resizable()
                     )
@@ -222,7 +221,7 @@ struct LevelSelectionView: View {
         guard let currentIndex = GameLocation.allCases.firstIndex(of: selectedLocation),
               currentIndex + 1 < GameLocation.allCases.count else { return false }
         let nextLocation = GameLocation.allCases[currentIndex + 1]
-        return playerProgress.unlockedLocations.contains(nextLocation)
+        return appState.playerProgress.unlockedLocations.contains(nextLocation)
     }
     
     private func previousLocation() {
@@ -240,7 +239,7 @@ struct LevelSelectionView: View {
         let nextLocation = GameLocation.allCases[currentIndex + 1]
         
         // Only switch if the location is unlocked
-        if playerProgress.unlockedLocations.contains(nextLocation) {
+        if appState.playerProgress.unlockedLocations.contains(nextLocation) {
             selectedLocation = nextLocation
             showLocationComment()
         }
@@ -250,14 +249,13 @@ struct LevelSelectionView: View {
         professorMessage = selectedLocation.professorComment
         showingProfessorComment = true
         
-        // Update current location in player progress
-        playerProgress.currentLocation = selectedLocation
-        DataManager.shared.savePlayerProgress(playerProgress)
+        // Update current location through AppStateManager
+        appState.updateCurrentLocation(selectedLocation)
     }
 }
 
 #Preview {
     NavigationStack {
-        LevelSelectionView(playerProgress: PlayerProgressViewModel())
+        LevelSelectionView()
     }
 }

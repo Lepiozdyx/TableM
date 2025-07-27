@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MainMenuView: View {
-    @StateObject private var viewModel = DataManager.shared.loadPlayerProgress()
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var navigateToLevelSelection = false
@@ -20,44 +20,46 @@ struct MainMenuView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                BackgroundView(playerProgress: viewModel)
-                
-                VStack(spacing: 0) {
-                    // Top section with coins and settings
-                    topSection
+                if appState.isDataLoaded {
+                    // Background
+                    BackgroundView(playerProgress: appState.playerProgress)
                     
-                    Spacer()
-                    
-                    // Main menu buttons
-                    menuButtonsSection
-                    
-                    Spacer()
-                    
-                    // Daily reward indicator
-                    if viewModel.dailyReward.canClaimToday {
-                        dailyRewardButton
+                    VStack(spacing: 0) {
+                        // Top section with coins and settings
+                        topSection
+                        
+                        Spacer()
+                        
+                        // Main menu buttons
+                        menuButtonsSection
+                        
+                        Spacer()
+                        
+                        // Daily reward indicator
+                        if appState.playerProgress.dailyReward.canClaimToday {
+                            dailyRewardButton
+                        }
                     }
+                } else {
+                    // Loading screen
+                    LoadingView()
                 }
             }
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToLevelSelection) {
-                LevelSelectionView(playerProgress: viewModel)
+                LevelSelectionView()
             }
             .sheet(isPresented: $showingShop) {
-                ShopView(playerProgress: viewModel)
+                ShopView()
             }
             .sheet(isPresented: $showingAchievements) {
-                AchievementsView(playerProgress: viewModel)
+                AchievementsView()
             }
             .sheet(isPresented: $showingSettings) {
-                SettingsView(playerProgress: viewModel)
+                SettingsView()
             }
             .sheet(isPresented: $showingDailyReward) {
-                DailyRewardView(playerProgress: viewModel)
-            }
-            .onAppear {
-                setupAudio()
+                DailyRewardView()
             }
             .onChange(of: scenePhase) { newPhase in
                 handleScenePhaseChange(newPhase)
@@ -69,7 +71,7 @@ struct MainMenuView: View {
     private var topSection: some View {
         HStack {
             // Coins display
-            ScoreboardView(coins: viewModel.coins)
+            ScoreboardView(coins: appState.playerProgress.coins)
             
             Spacer()
             
@@ -160,22 +162,13 @@ struct MainMenuView: View {
         .padding()
     }
     
-    // MARK: - Audio Management
-    private func setupAudio() {
-        // Initialize SettingsViewModel with player progress
-        SettingsViewModel.shared.setPlayerProgress(viewModel)
-    }
-    
+    // MARK: - App Lifecycle Management
     private func handleScenePhaseChange(_ newPhase: ScenePhase) {
         switch newPhase {
         case .active:
-            if viewModel.isMusicEnabled && viewModel.musicVolume > 0 {
-                SettingsViewModel.shared.startBackgroundMusic()
-            } else {
-                SettingsViewModel.shared.stopBackgroundMusic()
-            }
+            appState.handleAppDidBecomeActive()
         case .background, .inactive:
-            SettingsViewModel.shared.stopBackgroundMusic()
+            appState.handleAppWillResignActive()
         @unknown default:
             break
         }

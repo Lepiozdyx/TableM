@@ -29,16 +29,15 @@ class GameViewModel: ObservableObject {
     @Published var currentOnboardingIndex: Int = 0
     
     // References
-    private var playerProgress: PlayerProgressViewModel
+    private let appState = AppStateManager.shared
     
     // Constants
     private let maxAttempts = 10
     private let availableColors = GameColor.allCases
     
-    init(level: GameLevel, playerProgress: PlayerProgressViewModel) {
+    init(level: GameLevel) {
         self.currentLevel = level
-        self.playerProgress = playerProgress
-        self.isFirstLevel = (level.location == .france && level.id == 1 && playerProgress.totalGamesPlayed == 0)
+        self.isFirstLevel = (level.location == .france && level.id == 1 && appState.playerProgress.totalGamesPlayed == 0)
         
         setupGame()
     }
@@ -50,7 +49,7 @@ class GameViewModel: ObservableObject {
         attempts.removeAll()
         gameState = .playing
         
-        playerProgress.recordGamePlayed()
+        appState.recordGamePlayed()
         
         // Show onboarding for first level
         if isFirstLevel {
@@ -78,7 +77,7 @@ class GameViewModel: ObservableObject {
             "Select colors by tapping them. Each color will fill the highlighted position in your guess.",
             "After completing your row, press 'Check' to see the hints:",
             "🟢 Green dot = Right color in the right position",
-            "🔴 Red dot = Right color but wrong position", 
+            "🔴 Red dot = Right color but wrong position",
             "Empty space = Color not in the secret code",
             "You have 10 attempts to crack the code. Use logic and deduction to succeed!",
             "Ready to begin your first challenge? Good luck!"
@@ -121,7 +120,7 @@ class GameViewModel: ObservableObject {
             
             // Check for persistence achievement
             if attempts.count == maxAttempts {
-                playerProgress.recordPersistentPlay()
+                appState.recordPersistentPlay()
             }
         }
     }
@@ -157,11 +156,16 @@ class GameViewModel: ObservableObject {
     
     // MARK: - Game End Handling
     private func handleVictory(attempts: Int) {
-        playerProgress.completeLevel(
+        appState.completeLevel(
             location: currentLevel.location,
             levelId: currentLevel.id,
             attempts: attempts
         )
+        
+        // Update the current level reference to reflect completion
+        if let updatedLevel = appState.playerProgress.levelForLocationAndId(location: currentLevel.location, levelId: currentLevel.id) {
+            currentLevel = updatedLevel
+        }
         
         showProfessorMessage(getProfessorVictoryMessage())
     }
@@ -214,13 +218,13 @@ class GameViewModel: ObservableObject {
         
         if currentId < 5 {
             // Next level in same location
-            return playerProgress.levelForLocationAndId(location: currentLocation, levelId: currentId + 1)
+            return appState.playerProgress.levelForLocationAndId(location: currentLocation, levelId: currentId + 1)
         } else {
             // First level of next location
             if let currentLocationIndex = GameLocation.allCases.firstIndex(of: currentLocation),
                currentLocationIndex + 1 < GameLocation.allCases.count {
                 let nextLocation = GameLocation.allCases[currentLocationIndex + 1]
-                return playerProgress.levelForLocationAndId(location: nextLocation, levelId: 1)
+                return appState.playerProgress.levelForLocationAndId(location: nextLocation, levelId: 1)
             }
         }
         

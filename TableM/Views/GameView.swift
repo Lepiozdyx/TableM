@@ -2,7 +2,7 @@ import SwiftUI
 
 struct GameView: View {
     @StateObject private var gameViewModel: GameViewModel
-    @ObservedObject private var playerProgress: PlayerProgressViewModel
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.dismiss) private var dismiss
     
     // UI State
@@ -11,15 +11,14 @@ struct GameView: View {
     @State private var showingGameOver = false
     @State private var showingSecretStory = false
     
-    init(level: GameLevel, playerProgress: PlayerProgressViewModel) {
-        self.playerProgress = playerProgress
-        self._gameViewModel = StateObject(wrappedValue: GameViewModel(level: level, playerProgress: playerProgress))
+    init(level: GameLevel) {
+        self._gameViewModel = StateObject(wrappedValue: GameViewModel(level: level))
     }
     
     var body: some View {
         ZStack {
             // Background
-            Image(playerProgress.currentLocation.backgroundImage)
+            Image(appState.playerProgress.currentLocation.backgroundImage)
                 .resizable()
                 .ignoresSafeArea()
 
@@ -45,7 +44,7 @@ struct GameView: View {
             // Professor Overlay
             if case .speaking(let message, let isOnboarding) = gameViewModel.professorState {
                 ProfessorOverlayView(
-                    playerProgress: playerProgress,
+                    playerProgress: appState.playerProgress,
                     message: message,
                     isOnboarding: isOnboarding,
                     onNext: gameViewModel.nextOnboardingMessage,
@@ -105,7 +104,7 @@ struct GameView: View {
             SecretStoryView(location: gameViewModel.currentLevel.location)
         }
          .sheet(isPresented: $showingSettings) {
-             SettingsView(playerProgress: playerProgress)
+             SettingsView()
          }
     }
     
@@ -329,7 +328,6 @@ struct HintDotView: View {
 
 #Preview {
     GameView(
-        level: GameLevel(id: 1, location: .france, isUnlocked: true),
-        playerProgress: PlayerProgressViewModel()
+        level: GameLevel(id: 1, location: .france, isUnlocked: true)
     )
 }

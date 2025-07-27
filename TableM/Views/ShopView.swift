@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ShopView: View {
-    @ObservedObject var playerProgress: PlayerProgressViewModel
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.dismiss) private var dismiss
     
     @State private var navigateToBackgrounds = false
@@ -18,7 +18,7 @@ struct ShopView: View {
         NavigationStack {
             ZStack {
                 // Background
-                BackgroundView(playerProgress: playerProgress)
+                BackgroundView(playerProgress: appState.playerProgress)
                 
                 VStack(spacing: 0) {
                     // Top Navigation with Coins
@@ -54,10 +54,10 @@ struct ShopView: View {
             }
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToBackgrounds) {
-                BackgroundShopView(playerProgress: playerProgress)
+                BackgroundShopView()
             }
             .navigationDestination(isPresented: $navigateToSkins) {
-                SkinShopView(playerProgress: playerProgress)
+                SkinShopView()
             }
         }
     }
@@ -106,5 +106,5 @@ struct CategorySelectionButton: View {
 }
 
 #Preview {
-    ShopView(playerProgress: PlayerProgressViewModel())
+    ShopView()
 }

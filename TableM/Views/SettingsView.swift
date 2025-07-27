@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @ObservedObject var playerProgress: PlayerProgressViewModel
+    @ObservedObject private var appState = AppStateManager.shared
     @Environment(\.dismiss) private var dismiss
     
     @State private var showingResetAlert = false
@@ -16,7 +16,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                BackgroundView(playerProgress: playerProgress)
+                BackgroundView(playerProgress: appState.playerProgress)
                 
                 VStack {
                     topNavigationBar
@@ -36,10 +36,6 @@ struct SettingsView: View {
                 .padding()
             }
             .navigationBarHidden(true)
-        }
-        .onAppear {
-            // Just sync the reference, don't reinitialize
-            SettingsViewModel.shared.playerProgress = playerProgress
         }
         .alert("Reset Progress", isPresented: $showingResetAlert) {
             Button("Cancel", role: .cancel) { }
@@ -86,7 +82,10 @@ struct SettingsView: View {
                         .foregroundStyle(.white)
                     
                     Slider(
-                        value: $playerProgress.musicVolume,
+                        value: Binding(
+                            get: { appState.playerProgress.musicVolume },
+                            set: { appState.updateMusicVolume($0) }
+                        ),
                         in: 0...1,
                         step: 0.1
                     ) {
@@ -98,9 +97,6 @@ struct SettingsView: View {
                         Image(systemName: "speaker.wave.3")
                             .foregroundColor(.gray)
                     }
-                    .onChange(of: playerProgress.musicVolume) { newValue in
-                        SettingsViewModel.shared.updateMusicVolume(newValue)
-                    }
                 }
                 
                 // Sound Effects Settings
@@ -110,7 +106,10 @@ struct SettingsView: View {
                         .foregroundStyle(.white)
                     
                     Slider(
-                        value: $playerProgress.soundVolume,
+                        value: Binding(
+                            get: { appState.playerProgress.soundVolume },
+                            set: { appState.updateSoundVolume($0) }
+                        ),
                         in: 0...1,
                         step: 0.1
                     ) {
@@ -121,9 +120,6 @@ struct SettingsView: View {
                     } maximumValueLabel: {
                         Image(systemName: "speaker.wave.3")
                             .foregroundColor(.gray)
-                    }
-                    .onChange(of: playerProgress.soundVolume) { newValue in
-                        SettingsViewModel.shared.updateSoundVolume(newValue)
                     }
                 }
             }
@@ -161,46 +157,11 @@ struct SettingsView: View {
     
     // MARK: - Helper Methods
     private func resetGameProgress() {
-        // Stop all audio
-        SettingsViewModel.shared.stopAllAudio()
-        
-        // Reset progress in DataManager
-        DataManager.shared.resetPlayerProgress()
-        
-        // Reload fresh progress
-        let freshProgress = DataManager.shared.loadPlayerProgress()
-        
-        // Update all properties of current playerProgress with fresh data
-        updatePlayerProgress(with: freshProgress)
-        
-        // Re-setup SettingsViewModel with fresh progress
-        SettingsViewModel.shared.setPlayerProgress(playerProgress)
-        
-        // Play confirmation sound
+        appState.resetProgress()
         SettingsViewModel.shared.playButtonSound()
-    }
-    
-    private func updatePlayerProgress(with freshProgress: PlayerProgressViewModel) {
-        playerProgress.coins = freshProgress.coins
-        playerProgress.levels = freshProgress.levels
-        playerProgress.achievements = freshProgress.achievements
-        playerProgress.shopItems = freshProgress.shopItems
-        playerProgress.dailyReward = freshProgress.dailyReward
-        playerProgress.selectedBackground = freshProgress.selectedBackground
-        playerProgress.selectedSkin = freshProgress.selectedSkin
-        playerProgress.currentLocation = freshProgress.currentLocation
-        playerProgress.unlockedLocations = freshProgress.unlockedLocations
-        playerProgress.isMusicEnabled = freshProgress.isMusicEnabled
-        playerProgress.isSoundEnabled = freshProgress.isSoundEnabled
-        playerProgress.musicVolume = freshProgress.musicVolume
-        playerProgress.soundVolume = freshProgress.soundVolume
-        playerProgress.dailyTasks = freshProgress.dailyTasks
-        playerProgress.totalGamesPlayed = freshProgress.totalGamesPlayed
-        playerProgress.totalLevelsCompleted = freshProgress.totalLevelsCompleted
-        playerProgress.perfectGames = freshProgress.perfectGames
     }
 }
 
 #Preview {
-    SettingsView(playerProgress: PlayerProgressViewModel())
+    SettingsView()
 }
