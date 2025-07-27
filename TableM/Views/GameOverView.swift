@@ -28,16 +28,13 @@ struct GameOverView: View {
                 // Secret combination reveal
                 secretSection
                 
-                // Message
-                messageSection
-                
                 // Buttons
                 buttonsSection
             }
             .padding(30)
             .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white)
+                Image(.underlay1)
+                    .resizable()
             )
             .padding(.horizontal, 40)
             .scaleEffect(isVisible ? 1.0 : 0.8)
@@ -52,20 +49,24 @@ struct GameOverView: View {
     
     // MARK: - Title Section
     private var titleSection: some View {
-        VStack(spacing: 10) {
-            Text("Try Again!")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.red)
+        VStack(spacing: 20) {
+            Image(systemName: "face.smiling")
+                .font(.system(size: 60, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
             
-            Text("\(level.location.displayName)")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.primary)
+            Text("Game over!")
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
             
-            Text("Level \(level.id)")
-                .font(.title3)
-                .foregroundColor(.secondary)
+            VStack(spacing: 5) {
+                Text("\(level.location.displayName)")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(.gray)
+                
+                Text("Level \(level.id)")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.gray)
+            }
         }
     }
     
@@ -73,44 +74,26 @@ struct GameOverView: View {
     private var secretSection: some View {
         VStack(spacing: 15) {
             Text("The secret code was:")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
             
             HStack(spacing: 12) {
                 ForEach(0..<secretCombination.count, id: \.self) { index in
                     Circle()
                         .fill(secretCombination[index].color)
-                        .frame(width: 50, height: 50)
+                        .frame(width: 35, height: 35)
                         .overlay(
                             Circle()
-                                .stroke(Color.gray, lineWidth: 2)
+                                .stroke(Color.gray, lineWidth: 1)
                         )
                 }
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 20)
+        .padding()
         .background(
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color.gray.opacity(0.1))
         )
-    }
-    
-    // MARK: - Message Section
-    private var messageSection: some View {
-        VStack(spacing: 10) {
-            Text("Don't give up!")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.primary)
-            
-            Text("Every attempt brings you closer to cracking the code. Use logic and deduction to succeed!")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .lineLimit(nil)
-        }
-        .padding(.horizontal, 20)
     }
     
     // MARK: - Buttons Section
@@ -119,26 +102,26 @@ struct GameOverView: View {
             // Try Again button
             Button(action: onTryAgain) {
                 Text("Try Again")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
+                    .frame(width: 150)
                     .frame(height: 50)
-                    .background(Color.blue)
-                    .clipShape(RoundedRectangle(cornerRadius: 25))
+                    .background(
+                        Image(.btn3)
+                            .resizable()
+                    )
             }
             
             // Menu button
             Button(action: onMenu) {
                 Text("Menu")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.blue)
-                    .frame(maxWidth: .infinity)
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(width: 150)
                     .frame(height: 50)
                     .background(
-                        RoundedRectangle(cornerRadius: 25)
-                            .stroke(Color.blue, lineWidth: 2)
+                        Image(.btn2)
+                            .resizable()
                     )
             }
         }
@@ -147,7 +130,7 @@ struct GameOverView: View {
 
 #Preview {
     GameOverView(
-        level: GameLevel(id: 2, location: .france, isUnlocked: true),
+        level: GameLevel(id: 1, location: .france, isUnlocked: true),
         secretCombination: [.red, .magenta, .green, .purple],
         onTryAgain: { print("Try Again") },
         onMenu: { print("Menu") }

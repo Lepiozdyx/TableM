@@ -16,22 +16,23 @@ struct SecretStoryView: View {
     var body: some View {
         ZStack {
             // Background
+            Image(.bgDefault)
+                .resizable()
+                .ignoresSafeArea()
             
-            VStack(spacing: 0) {
+            VStack {
                 // Top navigation
                 topNavigationBar
                 
                 ScrollView {
-                    VStack(spacing: 30) {
+                    VStack {
                         // Title section
                         titleSection
                         
                         // Story content
                         storySection
-                        
-                        // Back button
-                        backButton
                     }
+                    .padding()
                 }
             }
         }
@@ -49,112 +50,56 @@ struct SecretStoryView: View {
         HStack {
             Spacer()
             
+            // Back/Home Button
             Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(Circle())
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.home)
+                            .resizable()
+                            .padding(10)
+                    }
             }
         }
-        .padding(.horizontal, 20)
+        .padding()
     }
     
     // MARK: - Title Section
     private var titleSection: some View {
-        VStack(spacing: 15) {
-            Image(systemName: "book.closed.fill")
-                .font(.system(size: 40))
-                .foregroundColor(.yellow)
-            
-            Text("Secret Revealed!")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-            
-            Text("Congratulations on completing \(location.displayName)")
-                .font(.title3)
-                .foregroundColor(.white.opacity(0.8))
-                .multilineTextAlignment(.center)
-        }
+        Text("Congratulations on completing \(location.displayName)")
+            .font(.system(size: 22, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
     }
     
     // MARK: - Story Section
     private var storySection: some View {
-        VStack(spacing: 20) {
-            // University info card
-            VStack(alignment: .leading, spacing: 20) {
-                HStack {
-                    Image(systemName: "building.columns.fill")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                    
-                    Text(universityName)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                }
+        // University info card
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Image(systemName: "building.columns.fill")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
                 
-                Text(location.secretStory)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .lineLimit(nil)
-                    .multilineTextAlignment(.leading)
-            }
-            .padding(25)
-            .background(Color.white.opacity(0.95))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            
-            // Achievement badge
-            achievementBadge
-        }
-    }
-    
-    // MARK: - Achievement Badge
-    private var achievementBadge: some View {
-        HStack(spacing: 15) {
-            Image(systemName: "star.fill")
-                .font(.title2)
-                .foregroundColor(.yellow)
-            
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Location Master")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                Text(universityName)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
                 
-                Text("You've unlocked all secrets of \(location.displayName)")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                Spacer()
             }
             
-            Spacer()
+            Text(location.secretStory)
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(nil)
+                .multilineTextAlignment(.leading)
         }
-        .padding(20)
-        .background(Color.purple.opacity(0.8))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
-    }
-    
-    // MARK: - Back Button
-    private var backButton: some View {
-        Button(action: { dismiss() }) {
-            HStack(spacing: 10) {
-                Image(systemName: "arrow.left")
-                    .font(.headline)
-                Text("Back to Levels")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .background(Color.blue.opacity(0.8))
-            .clipShape(RoundedRectangle(cornerRadius: 25))
-        }
-        .padding(.horizontal, 30)
+        .padding(30)
+        .background(
+            Image(.underlay2)
+                .resizable()
+        )
     }
     
     // MARK: - Helper Properties
@@ -176,12 +121,4 @@ struct SecretStoryView: View {
 
 #Preview {
     SecretStoryView(location: .france)
-}
-
-#Preview("Japan") {
-    SecretStoryView(location: .japan)
-}
-
-#Preview("Egypt") {
-    SecretStoryView(location: .egypt)
 }
