@@ -19,26 +19,27 @@ struct GameView: View {
     var body: some View {
         ZStack {
             // Background
+            Image(playerProgress.currentLocation.backgroundImage)
+                .resizable()
+                .ignoresSafeArea()
 
-            
-            VStack(spacing: 0) {
+            VStack {
                 // Top Navigation Bar
                 topNavigationBar
-                    .padding(.top, 10)
                 
                 // Question marks (current row at top)
                 currentRowQuestionsView
-                    .padding(.top, 20)
                 
                 // Game Content (History)
                 gameContentView
-                    .padding(.top, 20)
-                
+            }
+            
+            VStack {
                 Spacer()
                 
                 // Color Palette at bottom
                 colorPaletteView
-                    .padding(.bottom, 40)
+                    .padding(.bottom)
             }
             
             // Professor Overlay
@@ -105,9 +106,9 @@ struct GameView: View {
         .sheet(isPresented: $showingSecretStory) {
             SecretStoryView(location: gameViewModel.currentLevel.location)
         }
-        // .sheet(isPresented: $showingSettings) {
-        //     SettingsView(playerProgress: playerProgress)
-        // }
+         .sheet(isPresented: $showingSettings) {
+             SettingsView(playerProgress: playerProgress)
+         }
     }
     
     // MARK: - Top Navigation Bar
@@ -115,32 +116,37 @@ struct GameView: View {
         HStack {
             // Settings Button
             Button(action: { showingSettings = true }) {
-                Image(systemName: "gearshape.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.gear)
+                            .resizable()
+                            .scaledToFit()
+                            .padding(10)
+                    }
             }
             
             Spacer()
             
-            // Home Button
+            // Back/Home Button
             Button(action: { dismiss() }) {
-                Image(systemName: "house.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                Image(.btn1)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Image(.home)
+                            .resizable()
+                            .padding(10)
+                    }
             }
         }
-        .padding(.horizontal, 20)
+        .padding()
     }
     
     // MARK: - Current Row Questions (Top)
     private var currentRowQuestionsView: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             ForEach(0..<4, id: \.self) { index in
                 Button(action: {
                     gameViewModel.selectPosition(index)
@@ -149,23 +155,22 @@ struct GameView: View {
                         Circle()
                             .fill(
                                 gameViewModel.currentRow.colors[index]?.color ??
-                                Color.teal.opacity(0.7)
+                                Color.teal.opacity(0.9)
                             )
                             .frame(width: 50, height: 50)
                         
                         // Selection indicator
                         if gameViewModel.currentRow.selectedIndex == index {
                             Circle()
-                                .stroke(Color.white, lineWidth: 3)
-                                .frame(width: 56, height: 56)
+                                .stroke(Color.white, lineWidth: 2)
+                                .frame(width: 54, height: 54)
                         }
                         
                         // Question mark for empty slots
                         if gameViewModel.currentRow.colors[index] == nil {
                             Text("?")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
                         }
                     }
                 }
@@ -178,19 +183,20 @@ struct GameView: View {
                     gameViewModel.checkCurrentRow()
                 }) {
                     Text("Check")
-                        .font(.headline)
-                        .fontWeight(.bold)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
-                        .background(Color.blue)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .frame(width: 90)
+                        .frame(height: 45)
+                        .background(
+                            Image(.btn2)
+                                .resizable()
+                        )
                 }
                 .transition(.scale.combined(with: .opacity))
             }
         }
         .animation(.easeInOut(duration: 0.3), value: gameViewModel.canCheckRow())
-        .padding(.horizontal, 20)
+        .padding(.horizontal)
     }
     
     // MARK: - Game Content (Attempts History)
@@ -201,14 +207,13 @@ struct GameView: View {
                     AttemptRowView(attempt: attempt)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal)
         }
-        .frame(maxHeight: 300)
     }
     
-    // MARK: - Color Palette (8 colors in 2x4 grid)
+    // MARK: - Color Palette
     private var colorPaletteView: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 4), spacing: 2) {
             ForEach(GameColor.allCases, id: \.self) { color in
                 Button(action: {
                     gameViewModel.selectColor(color)
@@ -218,7 +223,13 @@ struct GameView: View {
                         .frame(width: 50, height: 50)
                         .overlay(
                             Circle()
-                                .stroke(Color.white, lineWidth: 2)
+                                .stroke(color.color, lineWidth: 2.5)
+                                .frame(width: 54, height: 54)
+                        )
+                        .padding(10)
+                        .background(
+                            Image(.btn1)
+                                .resizable()
                         )
                 }
                 .disabled(!gameViewModel.canInteract())
@@ -226,11 +237,7 @@ struct GameView: View {
                 .animation(.easeInOut(duration: 0.2), value: gameViewModel.canInteract())
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 15)
-        .background(Color.black.opacity(0.6))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
-        .padding(.horizontal, 20)
+        .frame(maxWidth: 300)
     }
 }
 
@@ -240,13 +247,6 @@ struct AttemptRowView: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            // Attempt number
-            Text("\(attempt.attemptNumber)")
-                .font(.caption)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .frame(width: 30)
-            
             Spacer()
             
             // Color circles
@@ -257,7 +257,8 @@ struct AttemptRowView: View {
                         .frame(width: 35, height: 35)
                         .overlay(
                             Circle()
-                                .stroke(Color.white, lineWidth: 1.5)
+                                .stroke(attempt.colors[index].color, lineWidth: 1.5)
+                                .frame(width: 38, height: 38)
                         )
                 }
             }
@@ -276,10 +277,10 @@ struct AttemptRowView: View {
                 }
             }
         }
-        .padding(.horizontal, 15)
+        .padding(.horizontal)
         .padding(.vertical, 8)
-        .background(Color.white.opacity(0.9))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .background(Color.white.opacity(0.8))
+        .clipShape(RoundedRectangle(cornerRadius: 15))
     }
 }
 
@@ -300,7 +301,7 @@ struct HintDotView: View {
         case .correctColor:
             return .red
         case .wrong:
-            return .clear
+            return .gray
         }
     }
 }
