@@ -81,7 +81,6 @@ class DataManager {
             let data = try encoder.encode(progress)
             userDefaults.set(data, forKey: StorageKeys.playerProgress)
             
-            print("Player progress saved successfully")
         } catch {
             print("Failed to save player progress: \(error.localizedDescription)")
         }
@@ -90,7 +89,6 @@ class DataManager {
     func loadPlayerProgress() -> PlayerProgressViewModel {
         do {
             guard let data = userDefaults.data(forKey: StorageKeys.playerProgress) else {
-                print("No saved player progress found, creating new one")
                 return PlayerProgressViewModel()
             }
             
@@ -98,12 +96,10 @@ class DataManager {
             decoder.dateDecodingStrategy = .iso8601
             
             let progress = try decoder.decode(PlayerProgressViewModel.self, from: data)
-            print("Player progress loaded successfully")
             return progress
             
         } catch {
             print("Failed to load player progress: \(error.localizedDescription)")
-            print("Creating new player progress")
             
             // If loading fails, create new progress and save it
             let newProgress = PlayerProgressViewModel()
@@ -132,13 +128,10 @@ class DataManager {
     private func performMigrationIfNeeded(from oldVersion: String, to newVersion: String) {
         print("Migrating data from version \(oldVersion) to \(newVersion)")
         
-        // Add version-specific migration logic here
         switch (oldVersion, newVersion) {
         case ("0.0.0", "1.0.0"):
-            // First version migration
             break
         default:
-            // Handle other migrations in future
             break
         }
     }
@@ -174,13 +167,11 @@ class DataManager {
         userDefaults.removeObject(forKey: StorageKeys.playerProgress)
         let newProgress = PlayerProgressViewModel()
         savePlayerProgress(newProgress)
-        print("Player progress has been reset")
     }
     
     func clearAllData() {
         let keys = [StorageKeys.playerProgress, StorageKeys.appVersion, StorageKeys.isFirstLaunch]
         keys.forEach { userDefaults.removeObject(forKey: $0) }
-        print("All app data has been cleared")
     }
     
     // MARK: - Utility Methods
@@ -194,15 +185,6 @@ class DataManager {
     
     var savedAppVersion: String {
         return userDefaults.string(forKey: StorageKeys.appVersion) ?? "0.0.0"
-    }
-    
-    // MARK: - Auto-Save Support
-    func enableAutoSave(for progress: PlayerProgressViewModel) {
-        // Observe changes to PlayerProgressViewModel and auto-save
-        // This would typically use Combine publishers in a real implementation
-        
-        // For now, we'll rely on manual saves at key points
-        print("Auto-save enabled for player progress")
     }
     
     // MARK: - Debug Methods

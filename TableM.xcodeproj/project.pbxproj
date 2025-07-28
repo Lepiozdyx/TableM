@@ -10,9 +10,22 @@
 		FADDD6BD2E31271D0034E016 /* TableM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TableM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FA29DC032E37A86500F6321C /* Exceptions for "TableM" folder in "TableM" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FADDD6BC2E31271D0034E016 /* TableM */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		FADDD6BF2E31271D0034E016 /* TableM */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FA29DC032E37A86500F6321C /* Exceptions for "TableM" folder in "TableM" target */,
+			);
 			path = TableM;
 			sourceTree = "<group>";
 		};
@@ -253,6 +266,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TableM/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TableMGaming;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -286,6 +300,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TableM/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TableMGaming;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

@@ -9,7 +9,7 @@ import AVFoundation
 import SwiftUI
 
 class SettingsViewModel: NSObject, ObservableObject {
-    // Singleton instance
+
     static let shared = SettingsViewModel()
     
     // Audio Players
@@ -38,7 +38,6 @@ class SettingsViewModel: NSObject, ObservableObject {
         self.playerProgress = progress
         
         if !isInitialized {
-            // First time initialization
             currentMusicVolume = Float(progress.musicVolume)
             currentSoundVolume = Float(progress.soundVolume)
             
@@ -46,7 +45,6 @@ class SettingsViewModel: NSObject, ObservableObject {
             applyCurrentSettings()
             isInitialized = true
         } else {
-            // Update reference but don't recreate audio or restart music
             updateVolumeSettings()
         }
     }
@@ -275,7 +273,6 @@ extension SettingsViewModel: AVAudioPlayerDelegate {
         if player == musicPlayer {
             isMusicPlaying = false
             
-            // Restart music if it should be playing (for safety, though numberOfLoops = -1 should handle this)
             if flag && currentMusicVolume > 0 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     self.startBackgroundMusic()
@@ -289,7 +286,7 @@ extension SettingsViewModel: AVAudioPlayerDelegate {
         
         if player == musicPlayer {
             isMusicPlaying = false
-            // Try to recreate the music player
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.setupBackgroundMusic()
             }

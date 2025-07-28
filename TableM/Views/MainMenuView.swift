@@ -65,7 +65,6 @@ struct MainMenuView: View {
                 handleScenePhaseChange(newPhase)
             }
             .onAppear {
-                // FIXED: Force refresh data when view appears
                 refreshDataIfNeeded()
             }
         }
@@ -101,7 +100,6 @@ struct MainMenuView: View {
     // MARK: - Menu Buttons Section
     private var menuButtonsSection: some View {
         VStack(spacing: 30) {
-            // Play button (main action)
             Button(action: {
                 SettingsViewModel.shared.playButtonSound()
                 navigateToLevelSelection = true
@@ -116,7 +114,6 @@ struct MainMenuView: View {
                     )
             }
             
-            // Shop button
             Button(action: {
                 SettingsViewModel.shared.playButtonSound()
                 showingShop = true
@@ -131,7 +128,6 @@ struct MainMenuView: View {
                     )
             }
             
-            // Achievements button
             Button(action: {
                 SettingsViewModel.shared.playButtonSound()
                 showingAchievements = true
@@ -168,7 +164,6 @@ struct MainMenuView: View {
     
     // MARK: - Data Refresh Helper
     private func refreshDataIfNeeded() {
-        // FIXED: Force reload data when returning to main menu
         if appState.isDataLoaded {
             appState.forceReload()
         }
@@ -179,7 +174,6 @@ struct MainMenuView: View {
         switch newPhase {
         case .active:
             appState.handleAppDidBecomeActive()
-            // FIXED: Also refresh data when app becomes active
             refreshDataIfNeeded()
         case .background, .inactive:
             appState.handleAppWillResignActive()

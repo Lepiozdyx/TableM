@@ -28,9 +28,9 @@ struct SettingsView: View {
                         .padding()
                     
                     Spacer()
-                    
+                    Spacer()
                     // Reset Progress Button
-                    resetProgressButton
+//                    resetProgressButton
                 }
             }
             .navigationBarHidden(true)

@@ -206,9 +206,6 @@ class PlayerProgressViewModel: ObservableObject, Codable {
         if totalLevelsCompleted > 0 {
             unlockAchievement(.codeBreaker)
         }
-        
-        // World Traveler - checked in unlockNextContent
-        // Perfection - checked in completeLevel
     }
     
     // MARK: - Shop Management

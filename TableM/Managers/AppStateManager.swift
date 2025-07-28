@@ -100,7 +100,7 @@ class AppStateManager: ObservableObject {
     
     func selectBackground(_ backgroundId: String) {
         playerProgress.selectBackground(backgroundId)
-        // FIXED: Force UI update immediately on main thread
+        
         DispatchQueue.main.async { [weak self] in
             self?.objectWillChange.send()
         }
@@ -109,7 +109,7 @@ class AppStateManager: ObservableObject {
     
     func selectSkin(_ skinId: String) {
         playerProgress.selectSkin(skinId)
-        // FIXED: Force UI update immediately on main thread
+        
         DispatchQueue.main.async { [weak self] in
             self?.objectWillChange.send()
         }
